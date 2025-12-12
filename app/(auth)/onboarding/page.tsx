@@ -3,9 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useUser } from '@/lib/hooks/useUser';
+import { saveUserProfile } from '@/lib/kv';
 
 export default function OnboardingWelcome() {
   const router = useRouter();
+  const { userId } = useUser();
   const [step, setStep] = useState(1);
   const [profile, setProfile] = useState({
     name: '',
@@ -15,12 +18,24 @@ export default function OnboardingWelcome() {
     primaryGoal: '',
   });
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (step === 1 && profile.name && profile.email) {
       setStep(2);
-    } else if (step === 2 && profile.primaryGoal) {
-      // Save to localStorage
-      localStorage.setItem('userProfile', JSON.stringify(profile));
+    } else if (step === 2 && profile.primaryGoal && userId) {
+      // Save to KV
+      await saveUserProfile({
+        userId,
+        email: profile.email,
+        name: profile.name,
+        createdAt: new Date().toISOString(),
+        lifeContext: {
+          age: parseInt(profile.age) || undefined,
+          employmentStatus: profile.occupation,
+        },
+        statedPreferences: {
+          priorityGoals: [profile.primaryGoal],
+        },
+      });
       router.push('/onboarding/assessment');
     }
   };

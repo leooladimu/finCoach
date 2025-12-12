@@ -4,9 +4,12 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { assessmentQuestions } from '@/lib/assessment';
 import type { AssessmentResult } from '@/types';
+import { useUser } from '@/lib/hooks/useUser';
+import { updateUserProfile } from '@/lib/kv';
 
 export default function AssessmentPage() {
   const router = useRouter();
+  const { userId } = useUser();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Array<{
     questionId: number;
@@ -43,8 +46,9 @@ export default function AssessmentPage() {
     setIsSubmitting(true);
     
     try {
-      // TODO: Get actual userId from auth context (Clerk)
-      const userId = 'demo-user-123';
+      if (!userId) {
+        throw new Error('User not authenticated');
+      }
       
       const response = await fetch('/api/assessment', {
         method: 'POST',
@@ -63,8 +67,14 @@ export default function AssessmentPage() {
       
       const assessmentResult: AssessmentResult = await response.json();
       
-      // Save to localStorage for now (until Vercel KV is set up)
-      localStorage.setItem('moneyStyle', JSON.stringify(assessmentResult));
+      // Save to KV
+      await updateUserProfile(userId, {
+        moneyStyle: {
+          type: assessmentResult.type,
+          scores: assessmentResult.scores,
+          assessmentDate: new Date().toISOString(),
+        },
+      });
       
       setResult(assessmentResult);
     } catch (error) {

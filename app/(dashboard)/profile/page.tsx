@@ -1,37 +1,74 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { AssessmentResult } from '@/types';
+import { useUser } from '@/lib/hooks/useUser';
+import { getUserProfile, updateUserProfile } from '@/lib/kv';
 
 export default function ProfilePage() {
-  // Load profile from localStorage using lazy initializer (avoids double render)
-  const [profile, setProfile] = useState(() => {
-    const savedProfile = localStorage.getItem('userProfile');
-    if (savedProfile) {
-      return JSON.parse(savedProfile);
-    }
-    return {
-      name: '',
-      email: '',
-      age: '',
-      occupation: '',
-      primaryGoal: '',
-    };
+  const { userId, isLoaded } = useUser();
+  const [profile, setProfile] = useState({
+    name: '',
+    email: '',
+    age: '',
+    occupation: '',
+    primaryGoal: '',
   });
   
-  // Load money style from localStorage using lazy initializer
-  const [moneyStyle, setMoneyStyle] = useState<AssessmentResult | null>(() => {
-    const savedStyle = localStorage.getItem('moneyStyle');
-    return savedStyle ? JSON.parse(savedStyle) : null;
-  });
-  
+  const [moneyStyle, setMoneyStyle] = useState<AssessmentResult | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState(profile);
 
-  const handleSave = () => {
+  // Load profile and money style from KV
+  useEffect(() => {
+    async function loadData() {
+      if (!isLoaded || !userId) return;
+      
+      const kvProfile = await getUserProfile(userId);
+      if (kvProfile) {
+        const profileData = {
+          name: kvProfile.name,
+          email: kvProfile.email,
+          age: kvProfile.lifeContext?.age?.toString() || '',
+          occupation: kvProfile.lifeContext?.employmentStatus || '',
+          primaryGoal: kvProfile.statedPreferences?.priorityGoals?.[0] || '',
+        };
+        setProfile(profileData);
+        setEditedProfile(profileData);
+        
+        if (kvProfile.moneyStyle) {
+          setMoneyStyle({
+            type: kvProfile.moneyStyle.type,
+            scores: kvProfile.moneyStyle.scores,
+            moneyStyleDescription: '',
+            coachingApproach: '',
+          });
+        }
+      }
+    }
+    
+    loadData();
+  }, [userId, isLoaded]);
+
+  const handleSave = async () => {
     setProfile(editedProfile);
-    localStorage.setItem('userProfile', JSON.stringify(editedProfile));
+    
+    // Save to KV
+    if (userId) {
+      await updateUserProfile(userId, {
+        name: editedProfile.name,
+        email: editedProfile.email,
+        lifeContext: {
+          age: parseInt(editedProfile.age) || undefined,
+          employmentStatus: editedProfile.occupation,
+        },
+        statedPreferences: {
+          priorityGoals: [editedProfile.primaryGoal],
+        },
+      });
+    }
+    
     setIsEditing(false);
   };
 

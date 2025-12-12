@@ -4,6 +4,8 @@ import type {
   FinancialSnapshot,
   BehaviorAction,
   Contradiction,
+  FinancialGoal,
+  Task,
 } from '@/types';
 
 // Import Vercel KV - will use their mock internally if env vars missing
@@ -22,6 +24,8 @@ const keys = {
   userFinances: (userId: string) => `user:${userId}:finances`,
   userActions: (userId: string) => `user:${userId}:actions`,
   userContradictions: (userId: string) => `user:${userId}:contradictions`,
+  userGoals: (userId: string) => `user:${userId}:goals`,
+  userTasks: (userId: string) => `user:${userId}:tasks`,
 };
 
 // User Profile operations
@@ -159,6 +163,94 @@ export async function updateContradiction(
   await kv.hset(contradictionsKey, {
     [contradictionId]: updated,
   });
+}
+
+// Financial Goals operations
+export async function saveGoal(goal: FinancialGoal): Promise<void> {
+  const goalsKey = keys.userGoals(goal.userId);
+  await kv.hset(goalsKey, {
+    [goal.id]: goal,
+  });
+}
+
+export async function getGoals(userId: string): Promise<FinancialGoal[]> {
+  const goalsKey = keys.userGoals(userId);
+  const goalsMap = await kv.hgetall<Record<string, FinancialGoal>>(goalsKey);
+  
+  if (!goalsMap) return [];
+  
+  return Object.values(goalsMap) as FinancialGoal[];
+}
+
+export async function getGoal(userId: string, goalId: string): Promise<FinancialGoal | null> {
+  const goalsKey = keys.userGoals(userId);
+  const goal = await kv.hget<FinancialGoal>(goalsKey, goalId);
+  return goal;
+}
+
+export async function updateGoal(
+  userId: string,
+  goalId: string,
+  updates: Partial<FinancialGoal>
+): Promise<void> {
+  const goalsKey = keys.userGoals(userId);
+  const goal = await kv.hget<FinancialGoal>(goalsKey, goalId);
+  
+  if (!goal) {
+    throw new Error(`Goal ${goalId} not found`);
+  }
+  
+  const updated = { ...goal, ...updates, updatedAt: new Date().toISOString() };
+  
+  await kv.hset(goalsKey, {
+    [goalId]: updated,
+  });
+}
+
+export async function deleteGoal(userId: string, goalId: string): Promise<void> {
+  const goalsKey = keys.userGoals(userId);
+  await kv.hdel(goalsKey, goalId);
+}
+
+// Task operations
+export async function saveTask(task: Task): Promise<void> {
+  const tasksKey = keys.userTasks(task.userId);
+  await kv.hset(tasksKey, {
+    [task.id]: task,
+  });
+}
+
+export async function getTasks(userId: string): Promise<Task[]> {
+  const tasksKey = keys.userTasks(userId);
+  const tasksMap = await kv.hgetall<Record<string, Task>>(tasksKey);
+  
+  if (!tasksMap) return [];
+  
+  return Object.values(tasksMap) as Task[];
+}
+
+export async function updateTask(
+  userId: string,
+  taskId: string,
+  updates: Partial<Task>
+): Promise<void> {
+  const tasksKey = keys.userTasks(userId);
+  const task = await kv.hget<Task>(tasksKey, taskId);
+  
+  if (!task) {
+    throw new Error(`Task ${taskId} not found`);
+  }
+  
+  const updated = { ...task, ...updates, updatedAt: new Date().toISOString() };
+  
+  await kv.hset(tasksKey, {
+    [taskId]: updated,
+  });
+}
+
+export async function deleteTask(userId: string, taskId: string): Promise<void> {
+  const tasksKey = keys.userTasks(userId);
+  await kv.hdel(tasksKey, taskId);
 }
 
 // Analytics helpers

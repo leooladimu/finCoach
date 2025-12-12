@@ -5,9 +5,12 @@ import Link from 'next/link';
 import { usePlaidLink } from 'react-plaid-link';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
-import type { AssessmentResult } from '@/types';
+import type { AssessmentResult, FinancialGoal } from '@/types';
+import { useUser } from '@/lib/hooks/useUser';
+import { getGoals, saveGoal, updateGoal, getUserProfile } from '@/lib/kv';
 
 export default function GoalsPage() {
+  const { userId, isLoaded } = useUser();
   const [activeTab, setActiveTab] = useState<'goals' | 'behavior' | 'plan'>('goals');
   const [showNewGoalModal, setShowNewGoalModal] = useState(false);
   const [showUpdateProgressModal, setShowUpdateProgressModal] = useState(false);
@@ -16,38 +19,80 @@ export default function GoalsPage() {
   const [linkToken, setLinkToken] = useState<string | null>(null);
   const [isLoadingLink, setIsLoadingLink] = useState(false);
   
-  // Goals state with sample data
-  const [goals, setGoals] = useState([
-    {
-      id: 'emergency-fund',
-      title: 'Build Emergency Fund',
-      targetAmount: 10000,
-      currentAmount: 6500,
-      targetDate: '2025-06-30',
-      category: 'Savings',
-    },
-    {
-      id: 'house-down-payment',
-      title: 'House Down Payment',
-      targetAmount: 60000,
-      currentAmount: 12000,
-      targetDate: '2026-12-31',
-      category: 'Home',
-    },
-  ]);
+  // Goals state
+  const [goals, setGoals] = useState<Array<{
+    id: string;
+    title: string;
+    targetAmount: number;
+    currentAmount: number;
+    targetDate: string;
+    category: string;
+  }>>([]);
   
-  // Load money style and goals from localStorage on mount
+  // Load money style and goals from KV on mount
   useEffect(() => {
-    const saved = localStorage.getItem('moneyStyle');
-    if (saved) {
-      setMoneyStyle(JSON.parse(saved));
+    async function loadData() {
+      if (!isLoaded || !userId) return;
+      
+      // Load money style from profile
+      const profile = await getUserProfile(userId);
+      if (profile?.moneyStyle) {
+        setMoneyStyle({
+          type: profile.moneyStyle.type,
+          scores: profile.moneyStyle.scores,
+          moneyStyleDescription: '',
+          coachingApproach: '',
+        });
+      }
+      
+      // Load goals from KV
+      const savedGoals = await getGoals(userId);
+      if (savedGoals.length > 0) {
+        setGoals(savedGoals.map(g => ({
+          id: g.id,
+          title: g.title,
+          targetAmount: g.targetAmount,
+          currentAmount: g.currentAmount,
+          targetDate: g.targetDate,
+          category: g.category,
+        })));
+      } else {
+        // Initialize with default goals for demo
+        const defaultGoals = [
+          {
+            id: 'emergency-fund',
+            title: 'Build Emergency Fund',
+            targetAmount: 10000,
+            currentAmount: 6500,
+            targetDate: '2025-06-30',
+            category: 'Savings',
+          },
+          {
+            id: 'house-down-payment',
+            title: 'House Down Payment',
+            targetAmount: 60000,
+            currentAmount: 12000,
+            targetDate: '2026-12-31',
+            category: 'Home',
+          },
+        ];
+        setGoals(defaultGoals);
+        
+        // Save to KV
+        for (const goal of defaultGoals) {
+          const kvGoal: FinancialGoal = {
+            ...goal,
+            userId,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          await saveGoal(kvGoal);
+        }
+      }
     }
     
-    const savedGoals = localStorage.getItem('financialGoals');
-    if (savedGoals) {
-      setGoals(JSON.parse(savedGoals));
-    }
-  }, []);
+    loadData();
+  }, [userId, isLoaded]);
   
   // Fetch Plaid link token when sync modal opens
   useEffect(() => {
@@ -58,12 +103,14 @@ export default function GoalsPage() {
   }, [showSyncModal]);
   
   const fetchLinkToken = async () => {
+    if (!userId) return;
+    
     setIsLoadingLink(true);
     try {
       const response = await fetch('/api/plaid/create-link-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: 'demo-user-123' }),
+        body: JSON.stringify({ userId }),
       });
       
       const data = await response.json();
@@ -90,7 +137,7 @@ export default function GoalsPage() {
     newAmount: '',
   });
   
-  const handleNewGoalSubmit = (e: React.FormEvent) => {
+  const handleNewGoalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Create new goal object
@@ -107,15 +154,23 @@ export default function GoalsPage() {
     const updatedGoals = [...goals, goal];
     setGoals(updatedGoals);
     
-    // Save to localStorage
-    localStorage.setItem('financialGoals', JSON.stringify(updatedGoals));
+    // Save to KV
+    if (userId) {
+      const kvGoal: FinancialGoal = {
+        ...goal,
+        userId,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      await saveGoal(kvGoal);
+    }
     
     // Reset form and close modal
     setShowNewGoalModal(false);
     setNewGoal({ title: '', targetAmount: '', targetDate: '', currentAmount: '' });
   };
   
-  const handleUpdateProgressSubmit = (e: React.FormEvent) => {
+  const handleUpdateProgressSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Find and update the goal
@@ -131,8 +186,15 @@ export default function GoalsPage() {
     
     setGoals(updatedGoals);
     
-    // Save to localStorage
-    localStorage.setItem('financialGoals', JSON.stringify(updatedGoals));
+    // Save to KV
+    if (userId) {
+      const goalToUpdate = updatedGoals.find(g => g.id === updateProgress.goalId);
+      if (goalToUpdate) {
+        await updateGoal(userId, goalToUpdate.id, {
+          currentAmount: goalToUpdate.currentAmount,
+        });
+      }
+    }
     
     // Reset form and close modal
     setShowUpdateProgressModal(false);

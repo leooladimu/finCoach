@@ -164,3 +164,30 @@ export interface CoachingStyle {
   communicationPreferences: string[];
   motivationalTriggers: string[];
 }
+
+// Financial goals
+export interface FinancialGoal {
+  id: string;
+  userId: string;
+  title: string;
+  targetAmount: number;
+  currentAmount: number;
+  targetDate: string;
+  category: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Action plan tasks
+export interface Task {
+  id: string;
+  userId: string;
+  title: string;
+  description: string;
+  completed: boolean;
+  priority: 'high' | 'medium' | 'low';
+  category: string;
+  dueDate?: string;
+  createdAt: string;
+  updatedAt: string;
+}

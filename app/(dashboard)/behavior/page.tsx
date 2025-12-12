@@ -1,19 +1,38 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { motion } from 'framer-motion';
 import type { AssessmentResult } from '@/types';
 import { useContradictions } from '@/lib/hooks/useContradictions';
+import { useUser } from '@/lib/hooks/useUser';
+import { getUserProfile } from '@/lib/kv';
 
 export default function BehaviorPage() {
-  // Load money style from localStorage using lazy initializer (avoids double render)
-  const [moneyStyle, setMoneyStyle] = useState<AssessmentResult | null>(() => {
-    const saved = localStorage.getItem('moneyStyle');
-    return saved ? JSON.parse(saved) : null;
-  });
+  const { userId, isLoaded } = useUser();
+  const [moneyStyle, setMoneyStyle] = useState<AssessmentResult | null>(null);
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
+  
+  // Load money style from KV
+  useEffect(() => {
+    async function loadMoneyStyle() {
+      if (!isLoaded || !userId) return;
+      
+      const profile = await getUserProfile(userId);
+      if (profile?.moneyStyle) {
+        // Convert profile moneyStyle to AssessmentResult format
+        setMoneyStyle({
+          type: profile.moneyStyle.type,
+          scores: profile.moneyStyle.scores,
+          moneyStyleDescription: '', // Will be populated if needed
+          coachingApproach: '', // Will be populated if needed
+        });
+      }
+    }
+    
+    loadMoneyStyle();
+  }, [userId, isLoaded]);
   
   // Use real contradiction detection
   const { contradictions: detectedContradictions, loading: contradictionsLoading } = useContradictions(timeRange);

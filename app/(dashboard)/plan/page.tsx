@@ -1,21 +1,40 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { AssessmentResult } from '@/types';
+import { useUser } from '@/lib/hooks/useUser';
+import { getTasks, updateTask, getUserProfile } from '@/lib/kv';
 
 export default function PlanPage() {
-  // Load money style from localStorage using lazy initializer (avoids double render)
-  const [moneyStyle, setMoneyStyle] = useState<AssessmentResult | null>(() => {
-    const saved = localStorage.getItem('moneyStyle');
-    return saved ? JSON.parse(saved) : null;
-  });
-  
-  // Load completed tasks from localStorage using lazy initializer
-  const [completedTasks, setCompletedTasks] = useState<string[]>(() => {
-    const savedTasks = localStorage.getItem('completedTasks');
-    return savedTasks ? JSON.parse(savedTasks) : [];
-  });
+  const { userId, isLoaded } = useUser();
+  const [moneyStyle, setMoneyStyle] = useState<AssessmentResult | null>(null);
+  const [completedTasks, setCompletedTasks] = useState<string[]>([]);
+
+  // Load money style and tasks from KV
+  useEffect(() => {
+    async function loadData() {
+      if (!isLoaded || !userId) return;
+      
+      // Load money style from profile
+      const profile = await getUserProfile(userId);
+      if (profile?.moneyStyle) {
+        setMoneyStyle({
+          type: profile.moneyStyle.type,
+          scores: profile.moneyStyle.scores,
+          moneyStyleDescription: '',
+          coachingApproach: '',
+        });
+      }
+      
+      // Load tasks from KV
+      const savedTasks = await getTasks(userId);
+      const completed = savedTasks.filter(t => t.completed).map(t => t.id);
+      setCompletedTasks(completed);
+    }
+    
+    loadData();
+  }, [userId, isLoaded]);
 
   // Action items based on behavioral insights
   const actionItems = [
@@ -138,12 +157,18 @@ export default function PlanPage() {
     },
   ];
 
-  const handleToggleTask = (taskId: string) => {
+  const handleToggleTask = async (taskId: string) => {
     const updated = completedTasks.includes(taskId)
       ? completedTasks.filter(id => id !== taskId)
       : [...completedTasks, taskId];
     setCompletedTasks(updated);
-    localStorage.setItem('completedTasks', JSON.stringify(updated));
+    
+    // Save to KV
+    if (userId) {
+      await updateTask(userId, taskId, {
+        completed: updated.includes(taskId),
+      });
+    }
   };
 
   const priorityColors = {
