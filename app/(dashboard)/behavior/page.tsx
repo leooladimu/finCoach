@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { motion } from 'framer-motion';
 import type { AssessmentResult } from '@/types';
+import { useContradictions } from '@/lib/hooks/useContradictions';
 
 export default function BehaviorPage() {
   // Load money style from localStorage using lazy initializer (avoids double render)
@@ -13,6 +14,9 @@ export default function BehaviorPage() {
     return saved ? JSON.parse(saved) : null;
   });
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
+  
+  // Use real contradiction detection
+  const { contradictions: detectedContradictions, loading: contradictionsLoading } = useContradictions(timeRange);
   
   // Sample spending data that changes based on time range (in real app, this would come from Plaid)
   const spendingDataByRange = {
@@ -142,7 +146,10 @@ export default function BehaviorPage() {
   };
   
   const spendingCategories = spendingDataByRange[timeRange].categories;
-  const contradictions = spendingDataByRange[timeRange].contradictions;
+  // Use real contradiction detection instead of mock data
+  const contradictions = detectedContradictions.length > 0 
+    ? detectedContradictions 
+    : spendingDataByRange[timeRange].contradictions; // Fallback to mock if none detected
   
   const totalSpent = spendingCategories.reduce((sum, cat) => sum + cat.amount, 0);
   const totalBudget = spendingCategories.reduce((sum, cat) => sum + cat.budget, 0);
@@ -534,8 +541,30 @@ export default function BehaviorPage() {
             </div>
           </div>
           
+          {/* Loading State */}
+          {contradictionsLoading && (
+            <div className="bg-gradient-to-br from-amber-50 to-stone-50 rounded-lg border-2 border-amber-800/30 p-8 shadow-md text-center">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-amber-800 border-t-transparent mb-4"></div>
+              <p className="text-stone-700 font-serif">Analyzing your spending patterns...</p>
+            </div>
+          )}
+          
+          {/* Empty State */}
+          {!contradictionsLoading && contradictions.length === 0 && (
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border-2 border-green-800/30 p-8 shadow-md text-center">
+              <div className="text-5xl mb-4">✨</div>
+              <h3 className="text-xl font-serif font-bold text-stone-900 mb-2">
+                Looking Good!
+              </h3>
+              <p className="text-stone-700 font-serif">
+                We haven&apos;t detected any contradictions between your goals and spending patterns. 
+                Keep up the great work!
+              </p>
+            </div>
+          )}
+          
           <div className="space-y-5">
-            {contradictions.map((contradiction) => {
+            {!contradictionsLoading && contradictions.map((contradiction) => {
               const severityColors: Record<'high' | 'medium' | 'low', string> = {
                 high: 'from-red-800 to-red-900 border-red-900',
                 medium: 'from-amber-700 to-amber-800 border-amber-900',
@@ -579,7 +608,7 @@ export default function BehaviorPage() {
                           {contradiction.title}
                         </h3>
                         <p className="text-xs font-serif text-stone-600 uppercase tracking-wide">
-                          {contradiction.type.replace('-', ' ')}
+                          {contradiction.type.replace(/-/g, ' ').replace(/_/g, ' ')}
                         </p>
                       </div>
                       

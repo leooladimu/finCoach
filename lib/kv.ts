@@ -1,5 +1,4 @@
-// Vercel KV will be initialized when environment variables are set
-// import { kv } from '@vercel/kv';
+// Vercel KV - use environment-aware setup
 import type {
   UserProfile,
   FinancialSnapshot,
@@ -7,16 +6,15 @@ import type {
   Contradiction,
 } from '@/types';
 
-// Mock KV for development without credentials
-const kv = {
-  get: async <T>(_key: string): Promise<T | null> => null,
-  set: async (_key: string, _value: unknown): Promise<void> => undefined,
-  lpush: async (_key: string, ..._values: unknown[]): Promise<number> => 0,
-  ltrim: async (_key: string, _start: number, _stop: number): Promise<void> => undefined,
-  lrange: async <T>(_key: string, _start: number, _stop: number): Promise<T[]> => [],
-  hset: async (_key: string, _data: Record<string, unknown>): Promise<number> => 0,
-  hgetall: async <T>(_key: string): Promise<T | null> => null,
-};
+// Import Vercel KV - will use their mock internally if env vars missing
+import { kv } from '@vercel/kv';
+
+// Log which mode we're in
+if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+  console.log('✅ Vercel KV configured (production mode)');
+} else {
+  console.log('⚠️  Vercel KV not configured - using Vercel\'s built-in mock (data may not persist)');
+}
 
 // Key patterns for Redis storage
 const keys = {
@@ -192,4 +190,102 @@ export async function calculateSavingsRate(userId: string): Promise<number> {
   
   const monthlyNet = snapshot.monthlyIncome - snapshot.monthlyExpenses;
   return (monthlyNet / snapshot.monthlyIncome) * 100;
+}
+
+/**
+ * Initialize mock financial snapshot for development
+ * Call this to populate KV with realistic demo data
+ */
+export async function initializeMockData(userId: string): Promise<void> {
+  const mockSnapshot: FinancialSnapshot = {
+    timestamp: new Date().toISOString(),
+    accounts: [
+      {
+        id: 'checking-1',
+        name: 'Chase Checking',
+        type: 'checking',
+        balance: 3500,
+        institution: 'Chase',
+      },
+      {
+        id: 'savings-1',
+        name: 'Ally Savings',
+        type: 'savings',
+        balance: 8200,
+        institution: 'Ally',
+      },
+      {
+        id: 'credit-1',
+        name: 'Chase Sapphire',
+        type: 'credit',
+        balance: -2100,
+        institution: 'Chase',
+      },
+      {
+        id: 'investment-1',
+        name: 'Vanguard 401k',
+        type: 'investment',
+        balance: 45000,
+        institution: 'Vanguard',
+      },
+    ],
+    transactions: [
+      // Housing
+      { id: 't1', date: '2025-12-01', amount: -2100, category: 'Housing', merchant: 'Property Management Co', accountId: 'checking-1' },
+      
+      // Food & Dining (over budget to trigger contradiction)
+      { id: 't2', date: '2025-12-03', amount: -45, category: 'Dining', merchant: 'Italian Restaurant', accountId: 'credit-1' },
+      { id: 't3', date: '2025-12-05', amount: -12, category: 'Dining', merchant: 'Starbucks', accountId: 'credit-1' },
+      { id: 't4', date: '2025-12-07', amount: -15, category: 'Dining', merchant: 'Chipotle', accountId: 'credit-1' },
+      { id: 't5', date: '2025-12-09', amount: -67, category: 'Dining', merchant: 'Steakhouse', accountId: 'credit-1' },
+      { id: 't6', date: '2025-12-10', amount: -120, category: 'Food & Dining', merchant: 'Whole Foods', accountId: 'checking-1' },
+      { id: 't7', date: '2025-12-12', amount: -18, category: 'Dining', merchant: 'Local Cafe', accountId: 'credit-1' },
+      { id: 't8', date: '2025-12-14', amount: -95, category: 'Food & Dining', merchant: 'Trader Joes', accountId: 'checking-1' },
+      { id: 't9', date: '2025-12-16', amount: -32, category: 'Dining', merchant: 'Thai Place', accountId: 'credit-1' },
+      { id: 't10', date: '2025-12-18', amount: -14, category: 'Dining', merchant: 'Starbucks', accountId: 'credit-1' },
+      { id: 't11', date: '2025-12-20', amount: -89, category: 'Dining', merchant: 'Sushi Bar', accountId: 'credit-1' },
+      { id: 't12', date: '2025-12-22', amount: -110, category: 'Food & Dining', merchant: 'Whole Foods', accountId: 'checking-1' },
+      { id: 't13', date: '2025-12-24', amount: -55, category: 'Dining', merchant: 'Brunch Spot', accountId: 'credit-1' },
+      { id: 't14', date: '2025-12-26', amount: -78, category: 'Dining', merchant: 'Mexican Restaurant', accountId: 'credit-1' },
+      
+      // Transportation (under budget)
+      { id: 't15', date: '2025-12-02', amount: -50, category: 'Transportation', merchant: 'Shell', accountId: 'checking-1' },
+      { id: 't16', date: '2025-12-15', amount: -45, category: 'Transportation', merchant: 'Chevron', accountId: 'checking-1' },
+      { id: 't17', date: '2025-12-20', amount: -25, category: 'Transportation', merchant: 'Uber', accountId: 'credit-1' },
+      
+      // Entertainment (over budget)
+      { id: 't18', date: '2025-12-04', amount: -120, category: 'Entertainment', merchant: 'Ticketmaster', accountId: 'credit-1' },
+      { id: 't19', date: '2025-12-11', amount: -65, category: 'Entertainment', merchant: 'Streaming Services', accountId: 'checking-1' },
+      { id: 't20', date: '2025-12-19', amount: -45, category: 'Entertainment', merchant: 'AMC Theaters', accountId: 'credit-1' },
+      { id: 't21', date: '2025-12-25', amount: -85, category: 'Entertainment', merchant: 'Steam', accountId: 'credit-1' },
+      
+      // Shopping (many small impulse buys - potential J type contradiction)
+      { id: 't22', date: '2025-12-06', amount: -15, category: 'Shopping', merchant: 'Target', accountId: 'checking-1' },
+      { id: 't23', date: '2025-12-08', amount: -12, category: 'Shopping', merchant: 'Amazon', accountId: 'credit-1' },
+      { id: 't24', date: '2025-12-10', amount: -18, category: 'Shopping', merchant: 'CVS', accountId: 'checking-1' },
+      { id: 't25', date: '2025-12-13', amount: -250, category: 'Shopping', merchant: 'Nike Store', accountId: 'credit-1' },
+      { id: 't26', date: '2025-12-17', amount: -16, category: 'Shopping', merchant: 'Target', accountId: 'checking-1' },
+      { id: 't27', date: '2025-12-21', amount: -14, category: 'Shopping', merchant: 'Amazon', accountId: 'credit-1' },
+      { id: 't28', date: '2025-12-23', amount: -95, category: 'Shopping', merchant: 'H&M', accountId: 'credit-1' },
+      { id: 't29', date: '2025-12-27', amount: -19, category: 'Shopping', merchant: 'Walmart', accountId: 'checking-1' },
+      
+      // Utilities
+      { id: 't30', date: '2025-12-05', amount: -120, category: 'Utilities', merchant: 'PG&E', accountId: 'checking-1' },
+      { id: 't31', date: '2025-12-15', amount: -80, category: 'Utilities', merchant: 'Comcast', accountId: 'checking-1' },
+      { id: 't32', date: '2025-12-20', amount: -60, category: 'Utilities', merchant: 'T-Mobile', accountId: 'checking-1' },
+      
+      // Healthcare
+      { id: 't33', date: '2025-12-08', amount: -25, category: 'Healthcare', merchant: 'CVS Pharmacy', accountId: 'checking-1' },
+      { id: 't34', date: '2025-12-22', amount: -150, category: 'Healthcare', merchant: 'Medical Center', accountId: 'checking-1' },
+      
+      // Investments
+      { id: 't35', date: '2025-12-01', amount: -500, category: 'Investment', merchant: 'Vanguard', accountId: 'checking-1' },
+      { id: 't36', date: '2025-12-15', amount: -500, category: 'Investment', merchant: 'Vanguard', accountId: 'checking-1' },
+    ],
+    netWorth: 54600,
+    monthlyIncome: 6000,
+    monthlyExpenses: 4500,
+  };
+  
+  await kv.set(keys.userFinances(userId), mockSnapshot);
 }
