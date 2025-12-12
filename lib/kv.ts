@@ -12,7 +12,7 @@ import type {
 const mockStore = new Map<string, any>();
 
 const createMockKV = () => ({
-  async get<T>(key: string): Promise<T | null> {
+  async get(key: string): Promise<any> {
     return mockStore.get(key) || null;
   },
   async set(key: string, value: any): Promise<void> {
@@ -23,11 +23,11 @@ const createMockKV = () => ({
     Object.assign(hash, field);
     mockStore.set(key, hash);
   },
-  async hget<T>(key: string, field: string): Promise<T | null> {
+  async hget(key: string, field: string): Promise<any> {
     const hash = mockStore.get(key) || {};
     return hash[field] || null;
   },
-  async hgetall<T>(key: string): Promise<T | null> {
+  async hgetall(key: string): Promise<any> {
     return mockStore.get(key) || null;
   },
   async hdel(key: string, ...fields: string[]): Promise<void> {
@@ -40,7 +40,7 @@ const createMockKV = () => ({
     list.unshift(...values);
     mockStore.set(key, list);
   },
-  async lrange<T>(key: string, start: number, stop: number): Promise<T[]> {
+  async lrange(key: string, start: number, stop: number): Promise<any[]> {
     const list = mockStore.get(key) || [];
     return list.slice(start, stop + 1);
   },
@@ -75,8 +75,8 @@ const keys = {
 
 // User Profile operations
 export async function getUserProfile(userId: string): Promise<UserProfile | null> {
-  const profile = await kv.get<UserProfile>(keys.userProfile(userId));
-  return profile;
+  const profile = await kv.get(keys.userProfile(userId));
+  return profile as UserProfile | null;
 }
 
 export async function saveUserProfile(profile: UserProfile): Promise<void> {
@@ -112,7 +112,7 @@ export async function saveFinancialSnapshot(
 export async function getLatestFinancialSnapshot(
   userId: string
 ): Promise<FinancialSnapshot | null> {
-  return await kv.get<FinancialSnapshot>(keys.userFinances(userId));
+  return await kv.get(keys.userFinances(userId)) as FinancialSnapshot | null;
 }
 
 export async function getFinancialHistory(
@@ -120,7 +120,7 @@ export async function getFinancialHistory(
   limit: number = 30
 ): Promise<FinancialSnapshot[]> {
   const timeSeriesKey = `${keys.userFinances(userId)}:history`;
-  const snapshots = await kv.lrange<FinancialSnapshot>(timeSeriesKey, 0, limit - 1);
+  const snapshots = await kv.lrange(timeSeriesKey, 0, limit - 1) as FinancialSnapshot[] | null;
   return snapshots || [];
 }
 
@@ -143,7 +143,7 @@ export async function getBehaviorHistory(
   limit: number = 100
 ): Promise<BehaviorAction[]> {
   const actionsKey = keys.userActions(userId);
-  const actions = await kv.lrange<BehaviorAction>(actionsKey, 0, limit - 1);
+  const actions = await kv.lrange(actionsKey, 0, limit - 1) as BehaviorAction[] | null;
   return actions || [];
 }
 
@@ -174,9 +174,9 @@ export async function getContradictions(
   onlyUnresolved: boolean = false
 ): Promise<Contradiction[]> {
   const contradictionsKey = keys.userContradictions(userId);
-  const contradictionsMap = await kv.hgetall<Record<string, Contradiction>>(
+  const contradictionsMap = await kv.hgetall(
     contradictionsKey
-  );
+  ) as Record<string, Contradiction> | null;
   
   if (!contradictionsMap) return [];
   
@@ -195,9 +195,9 @@ export async function updateContradiction(
   updates: Partial<Contradiction>
 ): Promise<void> {
   const contradictionsKey = keys.userContradictions(userId);
-  const contradictions = await kv.hgetall<Record<string, Contradiction>>(
+  const contradictions = await kv.hgetall(
     contradictionsKey
-  );
+  ) as Record<string, Contradiction> | null;
   
   if (!contradictions || !contradictions[contradictionId]) {
     throw new Error(`Contradiction ${contradictionId} not found`);
@@ -220,7 +220,7 @@ export async function saveGoal(goal: FinancialGoal): Promise<void> {
 
 export async function getGoals(userId: string): Promise<FinancialGoal[]> {
   const goalsKey = keys.userGoals(userId);
-  const goalsMap = await kv.hgetall<Record<string, FinancialGoal>>(goalsKey);
+  const goalsMap = await kv.hgetall(goalsKey) as Record<string, FinancialGoal> | null;
   
   if (!goalsMap) return [];
   
@@ -229,7 +229,7 @@ export async function getGoals(userId: string): Promise<FinancialGoal[]> {
 
 export async function getGoal(userId: string, goalId: string): Promise<FinancialGoal | null> {
   const goalsKey = keys.userGoals(userId);
-  const goal = await kv.hget<FinancialGoal>(goalsKey, goalId);
+  const goal = await kv.hget(goalsKey, goalId) as FinancialGoal | null;
   return goal;
 }
 
@@ -239,7 +239,7 @@ export async function updateGoal(
   updates: Partial<FinancialGoal>
 ): Promise<void> {
   const goalsKey = keys.userGoals(userId);
-  const goal = await kv.hget<FinancialGoal>(goalsKey, goalId);
+  const goal = await kv.hget(goalsKey, goalId) as FinancialGoal | null;
   
   if (!goal) {
     throw new Error(`Goal ${goalId} not found`);
@@ -267,7 +267,7 @@ export async function saveTask(task: Task): Promise<void> {
 
 export async function getTasks(userId: string): Promise<Task[]> {
   const tasksKey = keys.userTasks(userId);
-  const tasksMap = await kv.hgetall<Record<string, Task>>(tasksKey);
+  const tasksMap = await kv.hgetall(tasksKey) as Record<string, Task> | null;
   
   if (!tasksMap) return [];
   
@@ -280,7 +280,7 @@ export async function updateTask(
   updates: Partial<Task>
 ): Promise<void> {
   const tasksKey = keys.userTasks(userId);
-  const task = await kv.hget<Task>(tasksKey, taskId);
+  const task = await kv.hget(tasksKey, taskId) as Task | null;
   
   if (!task) {
     throw new Error(`Task ${taskId} not found`);
