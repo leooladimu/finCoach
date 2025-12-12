@@ -21,10 +21,13 @@ export default function OnboardingWelcome() {
   const handleContinue = async () => {
     if (step === 1 && profile.name && profile.email) {
       setStep(2);
-    } else if (step === 2 && profile.primaryGoal && userId) {
+    } else if (step === 2 && profile.primaryGoal) {
+      // Use real userId if available, otherwise use demo userId for local dev
+      const effectiveUserId = userId || 'demo-user-local';
+      
       // Save to KV
       await saveUserProfile({
-        userId,
+        userId: effectiveUserId,
         email: profile.email,
         name: profile.name,
         createdAt: new Date().toISOString(),

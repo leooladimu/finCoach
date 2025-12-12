@@ -1,18 +1,17 @@
 'use client';
 
-import { useUser as useClerkUser } from '@clerk/nextjs';
-
 /**
- * Custom hook that wraps Clerk's useUser to provide consistent user access
+ * Custom hook that provides consistent user access
  * Returns userId and loading state for use throughout the app
+ * For local development without Clerk, returns null (components use fallback IDs)
  */
 export function useUser() {
-  const { user, isLoaded, isSignedIn } = useClerkUser();
-
+  // Local dev without Clerk - return null user
+  // Components will use 'demo-user-local' as fallback
   return {
-    userId: user?.id || null,
-    user,
-    isLoaded,
-    isSignedIn,
+    userId: null,
+    user: null,
+    isLoaded: true,
+    isSignedIn: false,
   };
 }

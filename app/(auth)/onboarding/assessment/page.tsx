@@ -46,9 +46,8 @@ export default function AssessmentPage() {
     setIsSubmitting(true);
     
     try {
-      if (!userId) {
-        throw new Error('User not authenticated');
-      }
+      // Use real userId if available, otherwise use demo userId for local dev
+      const effectiveUserId = userId || 'demo-user-local';
       
       const response = await fetch('/api/assessment', {
         method: 'POST',
@@ -56,7 +55,7 @@ export default function AssessmentPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId,
+          userId: effectiveUserId,
           answers: finalAnswers,
         }),
       });
@@ -68,7 +67,7 @@ export default function AssessmentPage() {
       const assessmentResult: AssessmentResult = await response.json();
       
       // Save to KV
-      await updateUserProfile(userId, {
+      await updateUserProfile(effectiveUserId, {
         moneyStyle: {
           type: assessmentResult.type,
           scores: assessmentResult.scores,

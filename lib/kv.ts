@@ -8,14 +8,59 @@ import type {
   Task,
 } from '@/types';
 
-// Import Vercel KV - will use their mock internally if env vars missing
-import { kv } from '@vercel/kv';
+// Simple in-memory mock for local development
+const mockStore = new Map<string, any>();
 
-// Log which mode we're in
-if (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) {
+const createMockKV = () => ({
+  async get<T>(key: string): Promise<T | null> {
+    return mockStore.get(key) || null;
+  },
+  async set(key: string, value: any): Promise<void> {
+    mockStore.set(key, value);
+  },
+  async hset(key: string, field: Record<string, any>): Promise<void> {
+    const hash = mockStore.get(key) || {};
+    Object.assign(hash, field);
+    mockStore.set(key, hash);
+  },
+  async hget<T>(key: string, field: string): Promise<T | null> {
+    const hash = mockStore.get(key) || {};
+    return hash[field] || null;
+  },
+  async hgetall<T>(key: string): Promise<T | null> {
+    return mockStore.get(key) || null;
+  },
+  async hdel(key: string, ...fields: string[]): Promise<void> {
+    const hash = mockStore.get(key) || {};
+    fields.forEach(field => delete hash[field]);
+    mockStore.set(key, hash);
+  },
+  async lpush(key: string, ...values: any[]): Promise<void> {
+    const list = mockStore.get(key) || [];
+    list.unshift(...values);
+    mockStore.set(key, list);
+  },
+  async lrange<T>(key: string, start: number, stop: number): Promise<T[]> {
+    const list = mockStore.get(key) || [];
+    return list.slice(start, stop + 1);
+  },
+  async ltrim(key: string, start: number, stop: number): Promise<void> {
+    const list = mockStore.get(key) || [];
+    mockStore.set(key, list.slice(start, stop + 1));
+  },
+});
+
+// Use real Vercel KV if credentials are present, otherwise use mock
+let kv: any;
+const hasKVCredentials = process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN;
+
+if (hasKVCredentials) {
   console.log('✅ Vercel KV configured (production mode)');
+  const { kv: vercelKV } = await import('@vercel/kv');
+  kv = vercelKV;
 } else {
-  console.log('⚠️  Vercel KV not configured - using Vercel\'s built-in mock (data may not persist)');
+  console.log('⚠️  Using in-memory mock storage (local dev mode)');
+  kv = createMockKV();
 }
 
 // Key patterns for Redis storage

@@ -14,6 +14,16 @@ const isOnboardingRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
+  // In local dev without real Clerk keys, allow all routes
+  const hasClerkKeys = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && 
+                       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.length > 0 &&
+                       !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes('placeholder');
+  
+  if (!hasClerkKeys) {
+    // Local dev mode - allow all access without calling auth()
+    return;
+  }
+
   const { userId, redirectToSignIn } = await auth();
 
   // Allow public routes
