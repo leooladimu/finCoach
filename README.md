@@ -1,22 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FinCoach
 
-## Getting Started
+**Financial Coaching That Speaks Your Language**
+
+A serverless financial coaching application that provides personalized guidance based on your unique "Money Style" (Myers-Briggs-informed approach). Built with Next.js 14, TypeScript, and Vercel serverless infrastructure.
+
+## 🎯 Project Overview
+
+FinCoach is a comprehensive financial coaching platform designed to:
+- Assess your financial decision-making preferences through a 60-second "Money Style" quiz
+- Provide three distinct coaching modes: Goals, Behavior, and Plan
+- Detect contradictions between stated preferences and actual financial behavior
+- Deliver personality-adapted guidance without explicitly mentioning psychological frameworks
+
+## 🏗️ Architecture
+
+**Frontend:**
+- Next.js 14 (App Router)
+- React with TypeScript
+- Tailwind CSS
+- Recharts (data visualization)
+- Framer Motion (animations)
+
+**Backend:**
+- Vercel Edge Functions (serverless)
+- Vercel KV (Redis key-value store)
+- No traditional database - fully serverless
+
+**External Integrations:**
+- Clerk / NextAuth.js (authentication)
+- Plaid API (financial data - sandbox mode)
+- AWS Lambda (optional ML analysis)
+- AWS S3 (document storage)
+
+## 🚀 Getting Started
 
 First, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The main entry point is `app/page.tsx` (landing page).
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 

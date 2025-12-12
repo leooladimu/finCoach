@@ -9,9 +9,15 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.36.2",
+    "@vercel/kv": "^3.0.0",
+    "framer-motion": "^12.23.26",
     "next": "16.0.10",
+    "plaid": "^40.0.0",
     "react": "19.2.1",
-    "react-dom": "19.2.1"
+    "react-dom": "19.2.1",
+    "react-plaid-link": "^4.1.1",
+    "recharts": "^3.5.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

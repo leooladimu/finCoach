@@ -1,0 +1,37 @@
+{
+  "userId": "test-user-123",
+  "profile": {
+    "type": "INTJ",
+    "scores": {
+      "EI": -5,
+      "SN": 3,
+      "TF": 4,
+      "JP": 6
+    },
+    "statedPreferences": {
+      "riskTolerance": "moderate",
+      "savingsGoal": 50000,
+      "priorityGoals": ["Buy a house", "Build emergency fund"],
+      "spendingStyle": "planner"
+    }
+  },
+  "transactions": [
+    { "id": "1", "date": "2024-12-01", "amount": 2100, "category": "Housing", "merchant": "Rent Payment" },
+    { "id": "2", "date": "2024-12-05", "amount": 85, "category": "Food & Dining", "merchant": "Upscale Restaurant" },
+    { "id": "3", "date": "2024-12-07", "amount": 120, "category": "Food & Dining", "merchant": "Fine Dining" },
+    { "id": "4", "date": "2024-12-10", "amount": 45, "category": "Food & Dining", "merchant": "Cafe" },
+    { "id": "10", "date": "2024-12-03", "amount": 180, "category": "Entertainment", "merchant": "Concert Tickets" },
+    { "id": "11", "date": "2024-12-08", "amount": 65, "category": "Entertainment", "merchant": "Streaming Services" }
+  ],
+  "goals": [
+    {
+      "id": "house-downpayment",
+      "title": "House Down Payment",
+      "targetAmount": 50000,
+      "currentAmount": 12000,
+      "targetDate": "2025-12-31",
+      "category": "savings"
+    }
+  ],
+  "timeRange": "month"
+}
