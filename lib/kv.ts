@@ -52,7 +52,8 @@ const createMockKV = () => ({
 
 // Use real Vercel KV if credentials are present, otherwise use mock
 let kv: any;
-const hasKVCredentials = process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN;
+const hasKVCredentials = (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)||
+  process.env.REDIS_URL;
 
 if (hasKVCredentials) {
   console.log('✅ Vercel KV configured (production mode)');
