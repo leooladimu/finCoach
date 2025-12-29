@@ -46,8 +46,8 @@ export default function AssessmentPage() {
     setIsSubmitting(true);
     
     try {
-      // Use real userId if available, otherwise use demo userId for local dev
-      const effectiveUserId = userId || 'demo-user-local';
+      // Use real userId if available
+      const effectiveUserId = userId;
       
       const response = await fetch('/api/assessment', {
         method: 'POST',
