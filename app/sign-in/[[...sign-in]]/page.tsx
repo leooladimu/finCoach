@@ -1,4 +1,11 @@
 import { SignIn } from '@clerk/nextjs';
+import dynamic from 'next/dynamic';
+
+// Dynamically import PlaidLinkButton to avoid SSR issues with Plaid Link
+const PlaidLinkButton = dynamic(
+  () => import('@/components/PlaidLinkButton').then(mod => mod.PlaidLinkButton),
+  { ssr: false, loading: () => <div className="h-12"></div> }
+);
 
 export default function SignInPage() {
   return (
@@ -21,19 +28,40 @@ export default function SignInPage() {
         </div>
 
         {/* Clerk Sign In Component */}
-        <div className="flex justify-center">
-          <SignIn 
-            appearance={{
-              elements: {
-                rootBox: "mx-auto",
-                card: "bg-gradient-to-br from-stone-50 to-amber-50 border-4 border-double border-amber-800/40 shadow-2xl",
-              }
-            }}
-            routing="path"
-            path="/sign-in"
-            signUpUrl="/sign-up"
-            redirectUrl="/onboarding"
-          />
+        <div className="space-y-6">
+          <div className="flex justify-center">
+            <SignIn 
+              appearance={{
+                elements: {
+                  rootBox: "mx-auto w-full",
+                  card: "bg-gradient-to-br from-stone-50 to-amber-50 border-4 border-double border-amber-800/40 shadow-2xl w-full",
+                  footerActionLink: "text-amber-800 hover:text-amber-900",
+                  formButtonPrimary: "bg-amber-700 hover:bg-amber-800",
+                }
+              }}
+              routing="path"
+              path="/sign-in"
+              signUpUrl="/sign-up"
+              redirectUrl="/onboarding"
+            />
+          </div>
+          
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-amber-800/20"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-amber-50 text-amber-900 font-medium">
+                Or connect your bank account
+              </span>
+            </div>
+          </div>
+
+          <div className="px-4">
+            <PlaidLinkButton 
+              userId="demo-user" // In a real app, use the actual user ID after sign-in
+            />
+          </div>
         </div>
       </div>
     </div>

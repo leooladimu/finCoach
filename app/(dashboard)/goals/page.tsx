@@ -94,34 +94,7 @@ export default function GoalsPage() {
     loadData();
   }, [userId, isLoaded]);
   
-  // Fetch Plaid link token when sync modal opens
-  useEffect(() => {
-    if (showSyncModal && !linkToken) {
-      fetchLinkToken();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showSyncModal]);
-  
-  const fetchLinkToken = async () => {
-    if (!userId) return;
-    
-    setIsLoadingLink(true);
-    try {
-      const response = await fetch('/api/plaid/create-link-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId }),
-      });
-      
-      const data = await response.json();
-      setLinkToken(data.link_token);
-    } catch (error) {
-      console.error('Error fetching link token:', error);
-      alert('Failed to initialize bank connection. Please try again.');
-    } finally {
-      setIsLoadingLink(false);
-    }
-  };
+  // Removed duplicate link token fetch useEffect. Only fetch in handleSyncAccounts.
   
   // New goal form state
   const [newGoal, setNewGoal] = useState({
@@ -209,43 +182,151 @@ export default function GoalsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           publicToken,
-          userId: 'demo-user-123',
+          userId: userId || 'demo-user-123',
         }),
       });
       
       const data = await response.json();
       
       if (data.success) {
-        const accountsList = data.accounts.map((acc: { name: string; balances?: { current?: number } }) => 
+        const accountsList = data.accounts?.map((acc: { name: string; balances?: { current?: number } }) => 
           `- ${acc.name}: $${acc.balances?.current || 0}`
-        ).join('\n');
-        alert(`Successfully connected ${data.institution?.name || 'your bank'}!\n\nAccounts:\n${accountsList}`);
-        setShowSyncModal(false);
-        setLinkToken(null);
+        )?.join('\n') || 'No account details available';
+        
+        alert(`✅ Successfully connected ${data.institution?.name || 'your bank'}!\n\nAccounts:\n${accountsList}`);
+        
+        // Refresh goals or update UI as needed
+        if (userId) {
+          const savedGoals = await getGoals(userId);
+          if (savedGoals.length > 0) {
+            setGoals(savedGoals);
+          }
+        }
       } else {
-        alert('Failed to connect bank account. Please try again.');
+        throw new Error(data.error || 'Failed to connect bank account');
       }
     } catch (error) {
       console.error('Error exchanging token:', error);
-      alert('Failed to connect bank account. Please try again.');
+      alert(`❌ ${error instanceof Error ? error.message : 'Failed to connect bank account. Please try again.'}`);
+    } finally {
+      setShowSyncModal(false);
+      setLinkToken(null);
     }
-  }, []);
+  }, [userId]);
   
-  // Initialize Plaid Link (provide token or null string as fallback)
-  const { open: openPlaidLink, ready: plaidReady } = usePlaidLink({
-    token: linkToken || null,
-    onSuccess: onPlaidSuccess,
+  // Track if Plaid Link is open
+  const [isPlaidLinkOpen, setIsPlaidLinkOpen] = useState(false);
+
+  // Initialize Plaid Link
+  const { open: openPlaidLink } = usePlaidLink({
+    token: linkToken || '',
+    onSuccess: (publicToken: string) => {
+      console.log('Plaid Link success - public token:', publicToken);
+      console.log('Plaid Link success:', { publicToken });
+      setIsPlaidLinkOpen(false);
+      setLinkToken(null);
+      onPlaidSuccess(publicToken);
+      // Close the modal after successful connection
+      setShowSyncModal(false);
+    },
+    onExit: (err, metadata) => {
+      console.log('Plaid Link exit:', { err, metadata });
+      setIsPlaidLinkOpen(false);
+      setLinkToken(null);
+      
+      // Check if we should close the modal
+      const shouldClose = !err && metadata && 
+        (metadata.status === 'connected' || 
+         metadata.status === 'requires_verification');
+      
+      if (err || shouldClose) {
+        setShowSyncModal(false);
+      }
+      
+      if (err) {
+        console.error('Plaid Link error:', err);
+        alert('There was an error connecting to your bank. Please try again.');
+      }
+    },
+    onEvent: (eventName: string) => {
+      console.log('Plaid Link event:', eventName);
+      if (eventName === 'OPEN') {
+        setIsPlaidLinkOpen(true);
+      } else if (['EXIT', 'ERROR', 'HANDOFF'].includes(eventName)) {
+        setIsPlaidLinkOpen(false);
+      }
+    },
   });
   
-  const handleSyncAccounts = () => {
-    if (plaidReady && linkToken) {
-      openPlaidLink();
-    } else if (!linkToken) {
-      alert('Initializing bank connection. Please wait a moment and try again...');
-    } else {
-      alert('Please wait while we initialize the connection...');
+  // Handle sync accounts button click
+  const handleSyncAccounts = useCallback(async () => {
+    console.log('handleSyncAccounts called');
+    if (isLoadingLink) {
+      console.log('Link already in progress');
+      return;
     }
-  };
+    if (isPlaidLinkOpen) {
+      console.log('Plaid Link is already open');
+      return;
+    }
+    
+    try {
+      setIsLoadingLink(true);
+      console.log('Fetching new link token...');
+      
+      // Always fetch a new link token with a unique userId for each request
+      const uniqueUserId = (userId || 'demo-user-123') + '-' + Date.now();
+      const response = await fetch('/api/plaid/create-link-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: uniqueUserId }),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        console.error('Failed to get link token:', errorData);
+        throw new Error(errorData.error || 'Failed to get link token');
+      }
+      
+      const data = await response.json();
+      console.log('Received link token:', data.link_token ? 'Token received' : 'No token');
+      
+      if (!data.link_token) {
+        throw new Error('No link token received');
+      }
+      
+      setLinkToken(data.link_token);
+      
+      // Small delay to ensure state updates before trying to open
+      console.log('Link token received, waiting to open...');
+      const openLink = () => {
+        console.log('Attempting to open Plaid Link...');
+        console.log('openPlaidLink is a function:', typeof openPlaidLink === 'function');
+        if (typeof openPlaidLink === 'function') {
+          try {
+            openPlaidLink();
+            console.log('Plaid Link opened successfully');
+          } catch (error) {
+            console.error('Error opening Plaid Link:', error);
+          }
+        } else {
+          console.error('openPlaidLink is not a function:', openPlaidLink);
+        }
+      };
+      
+      // Try opening immediately and with a small delay
+      openLink();
+      const timeoutId = setTimeout(openLink, 100);
+      
+      return () => clearTimeout(timeoutId);
+      
+    } catch (error) {
+      console.error('Error in handleSyncAccounts:', error);
+      alert(`Failed to connect to your bank: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsLoadingLink(false);
+    }
+  }, [isLoadingLink, isPlaidLinkOpen, openPlaidLink, userId]);
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-100 via-amber-50 to-red-50">
@@ -352,7 +433,11 @@ export default function GoalsPage() {
                     borderRadius: '8px',
                     fontFamily: 'serif',
                   }}
-                  formatter={(value: number) => `$${value.toLocaleString()}`}
+                  formatter={(value: number | string | undefined, name: string | undefined) => {
+                    if (value === undefined || value === null) return '';
+                    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+                    return `$${!isNaN(numValue) ? numValue.toLocaleString() : String(value)}`;
+                  }}
                 />
                 <Legend wrapperStyle={{ fontFamily: 'serif', fontSize: '14px' }} />
                 <Bar dataKey="Current" fill="#d97706" radius={[8, 8, 0, 0]} />
@@ -737,7 +822,15 @@ export default function GoalsPage() {
       
       {/* Sync Accounts Modal */}
       {showSyncModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          onClick={(e) => {
+            // Only close if clicking on the backdrop, not the modal content
+            if (e.target === e.currentTarget && !isPlaidLinkOpen) {
+              setShowSyncModal(false);
+            }
+          }}
+        >
           <div className="bg-gradient-to-br from-stone-50/98 to-amber-50/95 rounded-lg shadow-2xl border-4 border-double border-amber-800/40 p-8 max-w-md w-full relative">
             {/* Corner decorations */}
             <div className="absolute top-0 left-0 w-12 h-12 border-l-2 border-t-2 border-amber-800/30 rounded-tl-lg" />
@@ -779,35 +872,27 @@ export default function GoalsPage() {
               
               {isLoadingLink ? (
                 <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-900"></div>
+                  <div className="animate-pulse text-amber-800">Loading...</div>
                 </div>
               ) : (
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => {
-                      setShowSyncModal(false);
-                      setLinkToken(null);
-                    }}
-                    className="flex-1 px-4 py-3 rounded-lg border-2 border-stone-400 text-stone-700 font-serif hover:bg-stone-100 transition-all"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleSyncAccounts}
-                    disabled={!plaidReady}
-                    className="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-amber-900 to-red-900 text-stone-50 font-serif font-semibold hover:from-amber-950 hover:to-red-950 transition-all border-2 border-amber-950/40 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {plaidReady ? 'Connect Now' : 'Initializing...'}
-                  </button>
-                </div>
+                <button
+                  onClick={handleSyncAccounts}
+                  className="w-full mt-6 bg-gradient-to-r from-amber-600 to-amber-800 text-white font-medium py-3 px-6 rounded-lg shadow-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                  disabled={isLoadingLink}
+                >
+                  {isLoadingLink ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Connecting...
+                    </>
+                  ) : (
+                    'Connect Bank Account'
+                  )}
+                </button>
               )}
-              
-              <p className="text-center text-xs text-stone-600 mt-4 font-light italic">
-                Powered by Plaid • Read-only access • Sandbox mode
-              </p>
-              <p className="text-center text-xs text-stone-500 mt-2 font-light">
-                In demo mode: Use any credentials to test the connection
-              </p>
             </div>
           </div>
         </div>
