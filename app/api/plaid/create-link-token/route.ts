@@ -14,9 +14,7 @@ export async function POST(request: NextRequest) {
       userId = `test-user-${Date.now()}`;
       console.warn('No userId provided, using fallback:', userId);
     }
-    
     // userId is now always set
-    
     // Check if Plaid credentials are configured
     if (!process.env.PLAID_CLIENT_ID || !process.env.PLAID_SECRET) {
       // Return mock token for development
@@ -25,23 +23,28 @@ export async function POST(request: NextRequest) {
         expiration: new Date(Date.now() + 3600000).toISOString(),
       });
     }
-    
     const linkToken = await createLinkToken(userId);
-    
     return NextResponse.json({
       link_token: linkToken,
     });
   } catch (error: any) {
     // Debug: Log Plaid API error details
+    let errorMessage = 'Failed to create link token';
     if (error?.response?.data) {
       console.error('Plaid API error:', JSON.stringify(error.response.data, null, 2));
+      if (error.response.data.error_message) {
+        errorMessage = error.response.data.error_message;
+      }
     } else if (error?.response) {
       console.error('Plaid API error (no data):', error.response);
+    } else if (error?.message) {
+      errorMessage = error.message;
+      console.error('Error creating link token:', error);
     } else {
       console.error('Error creating link token:', error);
     }
     return NextResponse.json(
-      { error: 'Failed to create link token' },
+      { error: errorMessage },
       { status: 500 }
     );
   }

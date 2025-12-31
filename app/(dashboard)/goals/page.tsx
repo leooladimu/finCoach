@@ -2,12 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { usePlaidLink } from 'react-plaid-link';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
 import type { AssessmentResult, FinancialGoal } from '@/types';
 import { useUser } from '@/lib/hooks/useUser';
 import { getGoals, saveGoal, updateGoal, getUserProfile } from '@/lib/kv';
+import { PlaidLinkButton } from '@/components/PlaidLinkButton';
 
 export default function GoalsPage() {
   const { userId, isLoaded } = useUser();
@@ -16,8 +16,6 @@ export default function GoalsPage() {
   const [showUpdateProgressModal, setShowUpdateProgressModal] = useState(false);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [moneyStyle, setMoneyStyle] = useState<AssessmentResult | null>(null);
-  const [linkToken, setLinkToken] = useState<string | null>(null);
-  const [isLoadingLink, setIsLoadingLink] = useState(false);
   
   // Goals state
   const [goals, setGoals] = useState<Array<{
@@ -173,160 +171,6 @@ export default function GoalsPage() {
     setShowUpdateProgressModal(false);
     setUpdateProgress({ goalId: 'emergency-fund', newAmount: '' });
   };
-  
-  // Plaid Link success callback
-  const onPlaidSuccess = useCallback(async (publicToken: string) => {
-    try {
-      const response = await fetch('/api/plaid/exchange-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          publicToken,
-          userId: userId || 'demo-user-123',
-        }),
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        const accountsList = data.accounts?.map((acc: { name: string; balances?: { current?: number } }) => 
-          `- ${acc.name}: $${acc.balances?.current || 0}`
-        )?.join('\n') || 'No account details available';
-        
-        alert(`✅ Successfully connected ${data.institution?.name || 'your bank'}!\n\nAccounts:\n${accountsList}`);
-        
-        // Refresh goals or update UI as needed
-        if (userId) {
-          const savedGoals = await getGoals(userId);
-          if (savedGoals.length > 0) {
-            setGoals(savedGoals);
-          }
-        }
-      } else {
-        throw new Error(data.error || 'Failed to connect bank account');
-      }
-    } catch (error) {
-      console.error('Error exchanging token:', error);
-      alert(`❌ ${error instanceof Error ? error.message : 'Failed to connect bank account. Please try again.'}`);
-    } finally {
-      setShowSyncModal(false);
-      setLinkToken(null);
-    }
-  }, [userId]);
-  
-  // Track if Plaid Link is open
-  const [isPlaidLinkOpen, setIsPlaidLinkOpen] = useState(false);
-
-  // Initialize Plaid Link
-  const { open: openPlaidLink } = usePlaidLink({
-    token: linkToken || '',
-    onSuccess: (publicToken: string) => {
-      console.log('Plaid Link success - public token:', publicToken);
-      console.log('Plaid Link success:', { publicToken });
-      setIsPlaidLinkOpen(false);
-      setLinkToken(null);
-      onPlaidSuccess(publicToken);
-      // Close the modal after successful connection
-      setShowSyncModal(false);
-    },
-    onExit: (err, metadata) => {
-      console.log('Plaid Link exit:', { err, metadata });
-      setIsPlaidLinkOpen(false);
-      setLinkToken(null);
-      
-      // Check if we should close the modal
-      const shouldClose = !err && metadata && 
-        (metadata.status === 'connected' || 
-         metadata.status === 'requires_verification');
-      
-      if (err || shouldClose) {
-        setShowSyncModal(false);
-      }
-      
-      if (err) {
-        console.error('Plaid Link error:', err);
-        alert('There was an error connecting to your bank. Please try again.');
-      }
-    },
-    onEvent: (eventName: string) => {
-      console.log('Plaid Link event:', eventName);
-      if (eventName === 'OPEN') {
-        setIsPlaidLinkOpen(true);
-      } else if (['EXIT', 'ERROR', 'HANDOFF'].includes(eventName)) {
-        setIsPlaidLinkOpen(false);
-      }
-    },
-  });
-  
-  // Handle sync accounts button click
-  const handleSyncAccounts = useCallback(async () => {
-    console.log('handleSyncAccounts called');
-    if (isLoadingLink) {
-      console.log('Link already in progress');
-      return;
-    }
-    if (isPlaidLinkOpen) {
-      console.log('Plaid Link is already open');
-      return;
-    }
-    
-    try {
-      setIsLoadingLink(true);
-      console.log('Fetching new link token...');
-      
-      // Always fetch a new link token with a unique userId for each request
-      const uniqueUserId = (userId || 'demo-user-123') + '-' + Date.now();
-      const response = await fetch('/api/plaid/create-link-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: uniqueUserId }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error('Failed to get link token:', errorData);
-        throw new Error(errorData.error || 'Failed to get link token');
-      }
-      
-      const data = await response.json();
-      console.log('Received link token:', data.link_token ? 'Token received' : 'No token');
-      
-      if (!data.link_token) {
-        throw new Error('No link token received');
-      }
-      
-      setLinkToken(data.link_token);
-      
-      // Small delay to ensure state updates before trying to open
-      console.log('Link token received, waiting to open...');
-      const openLink = () => {
-        console.log('Attempting to open Plaid Link...');
-        console.log('openPlaidLink is a function:', typeof openPlaidLink === 'function');
-        if (typeof openPlaidLink === 'function') {
-          try {
-            openPlaidLink();
-            console.log('Plaid Link opened successfully');
-          } catch (error) {
-            console.error('Error opening Plaid Link:', error);
-          }
-        } else {
-          console.error('openPlaidLink is not a function:', openPlaidLink);
-        }
-      };
-      
-      // Try opening immediately and with a small delay
-      openLink();
-      const timeoutId = setTimeout(openLink, 100);
-      
-      return () => clearTimeout(timeoutId);
-      
-    } catch (error) {
-      console.error('Error in handleSyncAccounts:', error);
-      alert(`Failed to connect to your bank: ${error instanceof Error ? error.message : 'Unknown error'}`);
-    } finally {
-      setIsLoadingLink(false);
-    }
-  }, [isLoadingLink, isPlaidLinkOpen, openPlaidLink, userId]);
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-100 via-amber-50 to-red-50">
@@ -822,15 +666,7 @@ export default function GoalsPage() {
       
       {/* Sync Accounts Modal */}
       {showSyncModal && (
-        <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-          onClick={(e) => {
-            // Only close if clicking on the backdrop, not the modal content
-            if (e.target === e.currentTarget && !isPlaidLinkOpen) {
-              setShowSyncModal(false);
-            }
-          }}
-        >
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-gradient-to-br from-stone-50/98 to-amber-50/95 rounded-lg shadow-2xl border-4 border-double border-amber-800/40 p-8 max-w-md w-full relative">
             {/* Corner decorations */}
             <div className="absolute top-0 left-0 w-12 h-12 border-l-2 border-t-2 border-amber-800/30 rounded-tl-lg" />
@@ -870,29 +706,7 @@ export default function GoalsPage() {
                 </div>
               </div>
               
-              {isLoadingLink ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-pulse text-amber-800">Loading...</div>
-                </div>
-              ) : (
-                <button
-                  onClick={handleSyncAccounts}
-                  className="w-full mt-6 bg-gradient-to-r from-amber-600 to-amber-800 text-white font-medium py-3 px-6 rounded-lg shadow-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-                  disabled={isLoadingLink}
-                >
-                  {isLoadingLink ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Connecting...
-                    </>
-                  ) : (
-                    'Connect Bank Account'
-                  )}
-                </button>
-              )}
+              <PlaidLinkButton userId={userId || 'demo-user-123'} />
             </div>
           </div>
         </div>

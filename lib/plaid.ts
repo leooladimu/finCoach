@@ -22,7 +22,7 @@ export async function createLinkToken(userId: string) {
         client_user_id: userId,
       },
       client_name: 'FinCoach',
-      products: [Products.Transactions, Products.Auth, Products.Balance],
+      products: [Products.Transactions],
       country_codes: [CountryCode.Us],
       language: 'en',
     });

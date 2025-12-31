@@ -1,20 +1,15 @@
 'use client';
 
-'use client';
-
 import { usePlaidLink } from 'react-plaid-link';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 
 export function PlaidLinkButton({ userId }: { userId: string }) {
   const [linkToken, setLinkToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [linkFlowStarted, setLinkFlowStarted] = useState(false);
-
 
   const createLinkToken = useCallback(async () => {
     setLoading(true);
-    setLinkToken(null);
     try {
       const response = await fetch('/api/plaid/create-link-token', {
         method: 'POST',
@@ -23,11 +18,16 @@ export function PlaidLinkButton({ userId }: { userId: string }) {
         },
         body: JSON.stringify({ userId }),
       });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create link token');
+      }
+      
       const data = await response.json();
       setLinkToken(data.link_token);
-      setLinkFlowStarted(true);
     } catch (error) {
       console.error('Error creating link token:', error);
+      setLinkToken(null);
     } finally {
       setLoading(false);
     }
@@ -55,16 +55,19 @@ export function PlaidLinkButton({ userId }: { userId: string }) {
     token: linkToken,
     onSuccess,
     onExit: (err, metadata) => {
-      setLinkFlowStarted(false);
       setLinkToken(null);
       console.log('Plaid Link exit:', { err, metadata });
     },
     onEvent: (eventName, metadata) => {
       console.log('Plaid Link event:', { eventName, metadata });
     },
-    // Only initialize Plaid Link when linkToken is set
-    enabled: !!linkToken,
   });
+
+  useEffect(() => {
+    if (linkToken && ready) {
+      open();
+    }
+  }, [linkToken, ready, open]);
 
   if (loading) {
     return (
@@ -78,20 +81,6 @@ export function PlaidLinkButton({ userId }: { userId: string }) {
     );
   }
 
-  // If linkToken is set, show the Plaid Link button
-  if (linkToken && linkFlowStarted) {
-    return (
-      <button
-        onClick={() => open()}
-        disabled={!ready}
-        className="w-full bg-gradient-to-r from-amber-600 to-amber-800 hover:from-amber-700 hover:to-amber-900 text-white font-medium py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none"
-      >
-        Connect Bank Account
-      </button>
-    );
-  }
-
-  // Default: show the "Sync Bank Accounts" button
   return (
     <button
       onClick={createLinkToken}
