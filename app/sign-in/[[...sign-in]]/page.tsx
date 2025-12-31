@@ -1,11 +1,7 @@
-import { SignIn } from '@clerk/nextjs';
-import dynamic from 'next/dynamic';
+'use client';
 
-// Dynamically import PlaidLinkButton to avoid SSR issues with Plaid Link
-const PlaidLinkButton = dynamic(
-  () => import('@/components/PlaidLinkButton').then(mod => mod.PlaidLinkButton),
-  { ssr: false, loading: () => <div className="h-12"></div> }
-);
+import { SignIn } from '@clerk/nextjs';
+import { PlaidLinkButton } from '@/components/PlaidLinkButton';
 
 export default function SignInPage() {
   return (
