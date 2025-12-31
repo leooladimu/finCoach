@@ -7,10 +7,14 @@ import { Loader2 } from 'lucide-react';
 export function PlaidLinkButton({ userId }: { userId: string }) {
   const [linkToken, setLinkToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [hasAttempted, setHasAttempted] = useState(false);
 
   const createLinkToken = useCallback(async () => {
+    if (loading || hasAttempted) return;
+    
     console.log('Creating link token for userId:', userId);
     setLoading(true);
+    setHasAttempted(true);
     try {
       const response = await fetch('/api/plaid/create-link-token', {
         method: 'POST',
@@ -37,8 +41,9 @@ export function PlaidLinkButton({ userId }: { userId: string }) {
       setLinkToken(null);
     } finally {
       setLoading(false);
+      setTimeout(() => setHasAttempted(false), 3000);
     }
-  }, [userId]);
+  }, [userId, loading, hasAttempted]);
 
 
   const onSuccess = async (publicToken: string) => {
@@ -64,7 +69,11 @@ export function PlaidLinkButton({ userId }: { userId: string }) {
     onSuccess,
     onExit: (err, metadata) => {
       setLinkToken(null);
+      setHasAttempted(false);
       console.log('Plaid Link exit:', { err, metadata });
+      if (err) {
+        console.error('Plaid error:', err);
+      }
     },
     onEvent: (eventName, metadata) => {
       console.log('Plaid Link event:', { eventName, metadata });
