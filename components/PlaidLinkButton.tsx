@@ -9,6 +9,7 @@ export function PlaidLinkButton({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(false);
 
   const createLinkToken = useCallback(async () => {
+    console.log('Creating link token for userId:', userId);
     setLoading(true);
     try {
       const response = await fetch('/api/plaid/create-link-token', {
@@ -19,14 +20,20 @@ export function PlaidLinkButton({ userId }: { userId: string }) {
         body: JSON.stringify({ userId }),
       });
       
+      console.log('Response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error('Failed to create link token');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('API error:', errorData);
+        throw new Error(errorData.error || 'Failed to create link token');
       }
       
       const data = await response.json();
+      console.log('Link token received:', data.link_token ? 'Yes' : 'No');
       setLinkToken(data.link_token);
     } catch (error) {
       console.error('Error creating link token:', error);
+      alert('Failed to initialize Plaid: ' + (error instanceof Error ? error.message : 'Unknown error'));
       setLinkToken(null);
     } finally {
       setLoading(false);

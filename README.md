@@ -28,7 +28,7 @@ FinCoach is a comprehensive financial coaching platform designed to:
 
 **External Integrations:**
 - Clerk / NextAuth.js (authentication)
-- Plaid API (financial data - sandbox mode)
+- Plaid API (financial data - sandbox mode!)
 - AWS Lambda (optional ML analysis)
 - AWS S3 (document storage)
 
