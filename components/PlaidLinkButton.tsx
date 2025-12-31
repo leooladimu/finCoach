@@ -40,6 +40,7 @@ export function PlaidLinkButton({ userId }: { userId: string }) {
     }
   }, [userId]);
 
+
   const onSuccess = async (publicToken: string) => {
     try {
       await fetch('/api/plaid/exchange-token', {
