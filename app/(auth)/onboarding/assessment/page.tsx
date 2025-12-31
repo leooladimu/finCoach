@@ -46,8 +46,8 @@ export default function AssessmentPage() {
     setIsSubmitting(true);
     
     try {
-      // Use real userId if available
-      const effectiveUserId = userId;
+      // Use real userId if available, fallback to demo user
+      const effectiveUserId = userId || 'demo-user-' + Date.now();
       
       const response = await fetch('/api/assessment', {
         method: 'POST',
@@ -66,14 +66,16 @@ export default function AssessmentPage() {
       
       const assessmentResult: AssessmentResult = await response.json();
       
-      // Save to KV
-      await updateUserProfile(effectiveUserId, {
-        moneyStyle: {
-          type: assessmentResult.type,
-          scores: assessmentResult.scores,
-          assessmentDate: new Date().toISOString(),
-        },
-      });
+      // Save to KV only if we have a real userId
+      if (userId) {
+        await updateUserProfile(userId, {
+          moneyStyle: {
+            type: assessmentResult.type,
+            scores: assessmentResult.scores,
+            assessmentDate: new Date().toISOString(),
+          },
+        });
+      }
       
       setResult(assessmentResult);
     } catch (error) {
