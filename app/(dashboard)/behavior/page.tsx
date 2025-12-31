@@ -454,7 +454,7 @@ export default function BehaviorPage() {
                     borderRadius: '8px',
                     fontFamily: 'serif',
                   }}
-                  formatter={(value: number) => `$${value.toLocaleString()}`}
+                  formatter={(value: number | undefined) => value ? `$${value.toLocaleString()}` : '$0'}
                 />
               </PieChart>
             </ResponsiveContainer>
