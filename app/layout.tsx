@@ -18,8 +18,8 @@ export const metadata: Metadata = {
   title: "FinCoach - Your Personal Financial Coach",
   description: "AI-powered financial coaching that adapts to your personality and goals",
   icons: {
-    icon: '/favicon.ico',
-    apple: '/apple-icon.png',
+    icon: '/favicon.ico?v=2',
+    apple: '/apple-icon.png?v=2',
   },
 };
 
