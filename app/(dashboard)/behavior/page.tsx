@@ -12,6 +12,7 @@ import { getUserProfile } from '@/lib/kv';
 export default function BehaviorPage() {
   const { userId, isLoaded } = useUser();
   const [moneyStyle, setMoneyStyle] = useState<AssessmentResult | null>(null);
+  const [userName, setUserName] = useState<string>('');
   const [timeRange, setTimeRange] = useState<'week' | 'month' | 'year'>('month');
   
   // Load money style from KV
@@ -28,6 +29,11 @@ export default function BehaviorPage() {
           moneyStyleDescription: '', // Will be populated if needed
           coachingApproach: '', // Will be populated if needed
         });
+      }
+      
+      // Set user name for avatar
+      if (profile?.name) {
+        setUserName(profile.name);
       }
     }
     
@@ -188,7 +194,7 @@ export default function BehaviorPage() {
             <div className="flex items-center gap-4">
               <span className="text-sm text-neutral-400">Welcome back!</span>
               <Link href="/profile" className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white font-semibold hover:bg-emerald-600 transition-colors cursor-pointer">
-                U
+                {userName.charAt(0).toUpperCase() || 'U'}
               </Link>
             </div>
           </div>

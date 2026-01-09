@@ -16,6 +16,7 @@ export default function GoalsPage() {
   const [showUpdateProgressModal, setShowUpdateProgressModal] = useState(false);
   const [showSyncModal, setShowSyncModal] = useState(false);
   const [moneyStyle, setMoneyStyle] = useState<AssessmentResult | null>(null);
+  const [userName, setUserName] = useState<string>('');
   
   // Goals state
   const [goals, setGoals] = useState<Array<{
@@ -41,6 +42,11 @@ export default function GoalsPage() {
           moneyStyleDescription: '',
           coachingApproach: '',
         });
+      }
+      
+      // Set user name for avatar
+      if (profile?.name) {
+        setUserName(profile.name);
       }
       
       // Load goals from KV
@@ -184,7 +190,7 @@ export default function GoalsPage() {
             <div className="flex items-center gap-4">
               <span className="text-sm text-neutral-400">Welcome back!</span>
               <Link href="/profile" className="w-10 h-10 bg-emerald-500 hover:bg-emerald-600 rounded-full flex items-center justify-center text-white font-semibold transition-colors cursor-pointer">
-                U
+                {userName.charAt(0).toUpperCase() || 'U'}
               </Link>
             </div>
           </div>
