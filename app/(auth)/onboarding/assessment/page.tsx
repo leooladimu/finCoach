@@ -312,6 +312,7 @@ export default function AssessmentPage() {
       // Clear saved progress after successful submission
       localStorage.removeItem(STORAGE_KEY);
       setResult(assessmentResult);
+      setIsSubmitting(false); // Important: Reset submitting state to show results
     } catch (error) {
       console.error('Error submitting assessment:', error);
       const errorMessage = error instanceof Error 
