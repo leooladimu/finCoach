@@ -44,57 +44,44 @@ export default function OnboardingWelcome() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-100 via-amber-50 to-red-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
         {/* Header */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-3 group mb-6">
-            <div className="text-4xl">💰</div>
-            <span className="text-3xl font-serif font-bold tracking-tight">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-900 via-red-900 to-amber-800">
-                Fin
-              </span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-800 via-orange-900 to-red-900">
-                Coach
-              </span>
-            </span>
+        <div className="text-center mb-12">
+          <Link href="/" className="inline-flex items-center gap-3 group mb-8">
+            <span className="text-3xl font-bold gradient-text">FinCoach</span>
           </Link>
-          <h1 className="text-3xl font-serif font-bold text-stone-900 mb-2">
+          <h1 className="text-4xl font-bold text-white mb-3">
             Welcome to Your Financial Journey
           </h1>
-          <p className="text-stone-700 font-serif">
+          <p className="text-neutral-400 text-lg">
             Let&apos;s get to know you so we can personalize your experience
           </p>
         </div>
 
         {/* Progress Bar */}
         <div className="mb-8">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center font-serif font-bold border-2 ${step >= 1 ? 'bg-gradient-to-br from-amber-800 to-red-900 text-stone-50 border-amber-900' : 'bg-stone-200 text-stone-600 border-stone-300'}`}>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold border-2 transition-all ${step >= 1 ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-neutral-900 text-neutral-600 border-neutral-700'}`}>
               1
             </div>
-            <div className={`h-1 w-16 ${step >= 2 ? 'bg-gradient-to-r from-amber-800 to-red-900' : 'bg-stone-300'}`} />
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center font-serif font-bold border-2 ${step >= 2 ? 'bg-gradient-to-br from-amber-800 to-red-900 text-stone-50 border-amber-900' : 'bg-stone-200 text-stone-600 border-stone-300'}`}>
+            <div className={`h-0.5 w-16 transition-colors ${step >= 2 ? 'bg-emerald-500' : 'bg-neutral-800'}`} />
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold border-2 transition-all ${step >= 2 ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-neutral-900 text-neutral-600 border-neutral-700'}`}>
               2
             </div>
-            <div className={`h-1 w-16 bg-stone-300`} />
-            <div className="w-12 h-12 rounded-full flex items-center justify-center font-serif font-bold border-2 bg-stone-200 text-stone-600 border-stone-300">
+            <div className={`h-0.5 w-16 bg-neutral-800`} />
+            <div className="w-10 h-10 rounded-full flex items-center justify-center font-semibold border-2 bg-neutral-900 text-neutral-600 border-neutral-700">
               3
             </div>
           </div>
-          <div className="text-center text-sm font-serif text-stone-600">
+          <div className="text-center text-sm text-neutral-500">
             {step === 1 && 'Step 1: Basic Info'}
             {step === 2 && 'Step 2: Your Goals'}
           </div>
         </div>
 
         {/* Main Card */}
-        <div className="bg-gradient-to-br from-stone-50 to-amber-50 rounded-lg border-4 border-double border-amber-800/40 p-8 shadow-2xl relative overflow-hidden">
-          {/* Corner Decorations */}
-          <div className="absolute top-0 left-0 w-12 h-12 border-l-2 border-t-2 border-amber-900/30" />
-          <div className="absolute top-0 right-0 w-12 h-12 border-r-2 border-t-2 border-amber-900/30" />
-          <div className="absolute bottom-0 left-0 w-12 h-12 border-l-2 border-b-2 border-amber-900/30" />
-          <div className="absolute bottom-0 right-0 w-12 h-12 border-r-2 border-b-2 border-amber-900/30" />
+        <div className="glass rounded-2xl p-8 border border-white/10">
 
           {/* Step 1: Basic Info */}
           {step === 1 && (
