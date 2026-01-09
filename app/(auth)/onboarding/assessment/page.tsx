@@ -49,6 +49,8 @@ function Toast({ message, type, onClose }: { message: string; type: 'error' | 's
 }
 
 const STORAGE_KEY = 'fincoach-assessment-progress';
+const RATE_LIMIT_KEY = 'fincoach-assessment-last-submit';
+const RATE_LIMIT_COOLDOWN = 60000; // 1 minute cooldown between submissions
 
 export default function AssessmentPage() {
   const router = useRouter();
@@ -122,6 +124,52 @@ export default function AssessmentPage() {
     setIsSubmitting(true);
     
     try {
+      // Validation 1: Check if all questions are answered
+      if (finalAnswers.length !== assessmentQuestions.length) {
+        throw new Error(`Incomplete assessment: ${finalAnswers.length}/${assessmentQuestions.length} questions answered`);
+      }
+
+      // Validation 2: Verify answer structure
+      const invalidAnswers = finalAnswers.filter(answer => 
+        typeof answer.questionId !== 'number' ||
+        typeof answer.dimension !== 'string' ||
+        typeof answer.score !== 'number' ||
+        answer.score < 0 || 
+        answer.score > 3
+      );
+
+      if (invalidAnswers.length > 0) {
+        throw new Error('Invalid answer format detected. Please refresh and try again.');
+      }
+
+      // Validation 3: Check for duplicate question IDs
+      const questionIds = finalAnswers.map(a => a.questionId);
+      const uniqueIds = new Set(questionIds);
+      if (questionIds.length !== uniqueIds.size) {
+        throw new Error('Duplicate answers detected. Please refresh and retake the assessment.');
+      }
+
+      // Validation 4: Ensure all dimensions are covered
+      const requiredDimensions = ['EI', 'SN', 'TF', 'JP'];
+      const answeredDimensions = new Set(finalAnswers.map(a => a.dimension));
+      const missingDimensions = requiredDimensions.filter(d => !answeredDimensions.has(d));
+      if (missingDimensions.length > 0) {
+        throw new Error(`Missing required dimensions: ${missingDimensions.join(', ')}`);
+      }
+
+      // Rate Limiting: Check last submission time
+      const lastSubmitTime = localStorage.getItem(RATE_LIMIT_KEY);
+      if (lastSubmitTime) {
+        const timeSinceLastSubmit = Date.now() - parseInt(lastSubmitTime);
+        if (timeSinceLastSubmit < RATE_LIMIT_COOLDOWN) {
+          const remainingSeconds = Math.ceil((RATE_LIMIT_COOLDOWN - timeSinceLastSubmit) / 1000);
+          throw new Error(`Please wait ${remainingSeconds} seconds before submitting again.`);
+        }
+      }
+
+      // Record this submission attempt
+      localStorage.setItem(RATE_LIMIT_KEY, Date.now().toString());
+
       // Use real userId if available, fallback to demo user
       const effectiveUserId = userId || 'demo-user-' + Date.now();
       
@@ -138,10 +186,23 @@ export default function AssessmentPage() {
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.error || 'Assessment submission failed');
+        
+        // Special handling for rate limit errors
+        if (response.status === 429) {
+          const retryAfter = errorData.retryAfter || 60;
+          throw new Error(`Rate limit exceeded. Please try again in ${retryAfter} seconds.`);
+        }
+        
+        throw new Error(errorData.error || `Request failed with status ${response.status}`);
       }
       
       const assessmentResult: AssessmentResult = await response.json();
+      
+      // Log rate limit headers for debugging
+      const rateLimitRemaining = response.headers.get('X-RateLimit-Remaining');
+      if (rateLimitRemaining && parseInt(rateLimitRemaining) <= 2) {
+        console.warn(`Low rate limit remaining: ${rateLimitRemaining} submissions left`);
+      }
       
       // Save to KV only if we have a real userId
       if (userId) {
