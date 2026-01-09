@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { assessmentQuestions } from '@/lib/assessment';
 import type { AssessmentResult } from '@/types';
@@ -15,8 +15,8 @@ function Toast({ message, type, onClose }: { message: string; type: 'error' | 's
   }, [onClose]);
 
   return (
-    <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-top-2 duration-300">
-      <div className={`glass rounded-xl p-4 pr-12 border flex items-start gap-3 min-w-[320px] ${
+    <div className="fixed top-4 right-4 left-4 md:left-auto z-50 animate-in slide-in-from-top-2 duration-300">
+      <div className={`glass rounded-xl p-4 pr-12 border flex items-start gap-3 w-full md:min-w-[320px] md:max-w-md ${
         type === 'error' 
           ? 'border-red-500/30 bg-red-500/10' 
           : 'border-emerald-500/30 bg-emerald-500/10'
@@ -25,21 +25,22 @@ function Toast({ message, type, onClose }: { message: string; type: 'error' | 's
           type === 'error' ? 'bg-red-500' : 'bg-emerald-500'
         }`}>
           {type === 'error' ? (
-            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           ) : (
-            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           )}
         </div>
-        <p className="text-white text-sm">{message}</p>
+        <p className="text-white text-sm flex-1">{message}</p>
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-neutral-400 hover:text-white transition-colors"
+          className="absolute top-3 right-3 text-neutral-400 hover:text-white transition-colors touch-manipulation"
+          aria-label="Close notification"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
@@ -64,6 +65,40 @@ export default function AssessmentPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<AssessmentResult | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
+  const [focusedOptionIndex, setFocusedOptionIndex] = useState(0);
+  const [isSlowConnection, setIsSlowConnection] = useState(false);
+  
+  // Refs for focus management
+  const questionCardRef = useRef<HTMLDivElement>(null);
+  const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  // Detect slow connection
+  useEffect(() => {
+    if (typeof navigator !== 'undefined' && 'connection' in navigator) {
+      const connection = (navigator as Navigator & { 
+        connection?: EventTarget & { 
+          effectiveType?: string; 
+          saveData?: boolean;
+        } 
+      }).connection;
+      if (connection) {
+        const checkConnection = () => {
+          // Consider 2G or slow-2g as slow
+          const isSlow = connection.effectiveType === '2g' || 
+                        connection.effectiveType === 'slow-2g' ||
+                        connection.saveData === true;
+          setIsSlowConnection(isSlow);
+        };
+        
+        checkConnection();
+        connection.addEventListener('change', checkConnection);
+        
+        return () => {
+          connection.removeEventListener('change', checkConnection);
+        };
+      }
+    }
+  }, []);
 
   // Load saved progress on mount
   useEffect(() => {
@@ -88,9 +123,68 @@ export default function AssessmentPage() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ currentQuestion, answers }));
     }
   }, [currentQuestion, answers]);
-  
+
   const question = assessmentQuestions[currentQuestion];
   const progress = ((currentQuestion + 1) / assessmentQuestions.length) * 100;
+
+  // Reset focus to first option when question changes
+  useEffect(() => {
+    setFocusedOptionIndex(0);
+    // Focus the question card for screen readers to announce the new question
+    if (questionCardRef.current) {
+      questionCardRef.current.focus();
+    }
+  }, [currentQuestion]);
+
+  // Focus the selected option after render
+  useEffect(() => {
+    if (optionRefs.current[focusedOptionIndex]) {
+      optionRefs.current[focusedOptionIndex]?.focus();
+    }
+  }, [focusedOptionIndex]);
+
+  // Keyboard navigation handler
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    const optionsCount = question.options.length;
+
+    switch (e.key) {
+      case 'ArrowDown':
+      case 'ArrowRight':
+        e.preventDefault();
+        setFocusedOptionIndex((prev) => (prev + 1) % optionsCount);
+        break;
+      
+      case 'ArrowUp':
+      case 'ArrowLeft':
+        e.preventDefault();
+        setFocusedOptionIndex((prev) => (prev - 1 + optionsCount) % optionsCount);
+        break;
+      
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        handleAnswer(focusedOptionIndex);
+        break;
+      
+      case 'Backspace':
+        if (currentQuestion > 0 && !e.shiftKey) {
+          e.preventDefault();
+          handleBack();
+        }
+        break;
+      
+      case '1':
+      case '2':
+      case '3':
+      case '4':
+        e.preventDefault();
+        const numIndex = parseInt(e.key) - 1;
+        if (numIndex < optionsCount) {
+          handleAnswer(numIndex);
+        }
+        break;
+    }
+  }, [focusedOptionIndex, currentQuestion, question.options.length]); // eslint-disable-line react-hooks/exhaustive-deps
   
   const handleAnswer = async (optionIndex: number) => {
     const selectedOption = question.options[optionIndex];
@@ -235,14 +329,23 @@ export default function AssessmentPage() {
   if (result) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-4">
-        <div className="max-w-2xl w-full glass rounded-2xl p-8 border border-white/10">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-6">
+        <div 
+          className="max-w-2xl w-full glass rounded-2xl p-4 sm:p-6 md:p-8 border border-white/10"
+          role="region"
+          aria-labelledby="results-heading"
+        >
+          <div className="text-center mb-6 sm:mb-8">
+            <div 
+              className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 mb-4 sm:mb-6"
+              role="img"
+              aria-label="Success"
+            >
               <svg
-                className="w-8 h-8 text-emerald-500"
+                className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -252,29 +355,39 @@ export default function AssessmentPage() {
                 />
               </svg>
             </div>
-            <h1 className="text-3xl font-semibold text-white mb-2">
+            <h1 
+              id="results-heading"
+              className="text-2xl sm:text-3xl font-semibold text-white mb-2"
+            >
               Your Money Style: <span className="gradient-text">{result.type}</span>
             </h1>
           </div>
           
-          <div className="space-y-4">
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10 hover:border-emerald-500/30 transition-all">
-              <h2 className="text-lg font-medium text-white mb-3">
+          <div className="space-y-3 sm:space-y-4" role="list">
+            <div 
+              className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10 hover:border-emerald-500/30 transition-all"
+              role="listitem"
+            >
+              <h2 className="text-base sm:text-lg font-medium text-white mb-2 sm:mb-3">
                 What This Means
               </h2>
-              <p className="text-neutral-400 leading-relaxed">{result.moneyStyleDescription}</p>
+              <p className="text-sm sm:text-base text-neutral-400 leading-relaxed">{result.moneyStyleDescription}</p>
             </div>
             
-            <div className="bg-white/5 rounded-xl p-6 border border-white/10 hover:border-blue-500/30 transition-all">
-              <h2 className="text-lg font-medium text-white mb-3">
+            <div 
+              className="bg-white/5 rounded-xl p-4 sm:p-6 border border-white/10 hover:border-blue-500/30 transition-all"
+              role="listitem"
+            >
+              <h2 className="text-base sm:text-lg font-medium text-white mb-2 sm:mb-3">
                 How We&apos;ll Work Together
               </h2>
-              <p className="text-neutral-400 leading-relaxed">{result.coachingApproach}</p>
+              <p className="text-sm sm:text-base text-neutral-400 leading-relaxed">{result.coachingApproach}</p>
             </div>
             
             <button
               onClick={handleContinue}
-              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white py-4 rounded-xl font-medium transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40"
+              className="w-full bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-white py-3 sm:py-4 rounded-xl font-medium transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 touch-manipulation active:scale-[0.98]"
+              aria-label="Continue to your personalized dashboard"
             >
               Continue to Dashboard
             </button>
@@ -286,13 +399,36 @@ export default function AssessmentPage() {
   
   if (isSubmitting) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative w-16 h-16 mx-auto mb-6">
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
+        <div 
+          className="text-center max-w-md w-full"
+          role="status"
+          aria-live="polite"
+          aria-label="Analyzing your responses"
+        >
+          <div className="relative w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-6" aria-hidden="true">
             <div className="absolute inset-0 rounded-full border-2 border-emerald-500/20"></div>
             <div className="absolute inset-0 rounded-full border-2 border-t-emerald-500 animate-spin"></div>
           </div>
-          <p className="text-neutral-400 text-lg">Analyzing your Money Style...</p>
+          <p className="text-neutral-400 text-base sm:text-lg mb-2">Analyzing your Money Style...</p>
+          {isSlowConnection ? (
+            <p className="text-amber-500 text-sm flex items-center justify-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              Slow connection detected - this may take longer
+            </p>
+          ) : (
+            <p className="text-neutral-600 text-sm">This usually takes just a few seconds</p>
+          )}
+          <span className="sr-only">Please wait while we analyze your assessment responses.</span>
+          
+          {/* Progress dots animation */}
+          <div className="flex justify-center gap-1.5 mt-6" aria-hidden="true">
+            <div className="w-2 h-2 rounded-full bg-emerald-500/40 animate-pulse" style={{ animationDelay: '0ms' }}></div>
+            <div className="w-2 h-2 rounded-full bg-emerald-500/40 animate-pulse" style={{ animationDelay: '150ms' }}></div>
+            <div className="w-2 h-2 rounded-full bg-emerald-500/40 animate-pulse" style={{ animationDelay: '300ms' }}></div>
+          </div>
         </div>
       </div>
     );
@@ -311,16 +447,23 @@ export default function AssessmentPage() {
 
       <div className="max-w-3xl w-full">
         {/* Progress bar */}
-        <div className="mb-8">
+        <div className="mb-8" role="region" aria-label="Assessment progress">
           <div className="flex justify-between items-center mb-3">
-            <span className="text-sm text-neutral-400">
+            <span className="text-sm text-neutral-400" aria-current="step">
               Question {currentQuestion + 1} of {assessmentQuestions.length}
             </span>
-            <span className="text-sm text-neutral-500">
+            <span className="text-sm text-neutral-500" aria-live="polite">
               ~{Math.ceil((assessmentQuestions.length - currentQuestion - 1) * 9)}s remaining
             </span>
           </div>
-          <div className="w-full bg-neutral-900 rounded-full h-1 overflow-hidden">
+          <div 
+            className="w-full bg-neutral-900 rounded-full h-1 overflow-hidden"
+            role="progressbar"
+            aria-valuenow={currentQuestion + 1}
+            aria-valuemin={1}
+            aria-valuemax={assessmentQuestions.length}
+            aria-label={`Assessment progress: question ${currentQuestion + 1} of ${assessmentQuestions.length}`}
+          >
             <div
               className="bg-gradient-to-r from-emerald-500 to-blue-500 h-1 transition-all duration-300"
               style={{ width: `${progress}%` }}
@@ -329,21 +472,60 @@ export default function AssessmentPage() {
         </div>
         
         {/* Question card */}
-        <div className="glass rounded-2xl p-8 border border-white/10">
-          <h2 className="text-2xl font-medium text-white mb-8 leading-relaxed">
+        <div 
+          ref={questionCardRef}
+          className="glass rounded-2xl p-4 sm:p-6 md:p-8 border border-white/10"
+          role="group"
+          aria-labelledby="question-text"
+          aria-describedby="question-instructions"
+          onKeyDown={handleKeyDown}
+          tabIndex={-1}
+        >
+          <h2 
+            id="question-text"
+            className="text-xl sm:text-2xl font-medium text-white mb-6 sm:mb-8 leading-relaxed"
+            role="heading"
+            aria-level={1}
+          >
             {question.questionText}
           </h2>
           
-          <div className="space-y-3">
+          <div 
+            className="space-y-2 sm:space-y-3"
+            role="radiogroup"
+            aria-labelledby="question-text"
+            aria-required="true"
+          >
             {question.options.map((option, index) => (
               <button
                 key={index}
+                ref={(el) => { optionRefs.current[index] = el; }}
                 onClick={() => handleAnswer(index)}
-                className="w-full text-left p-5 rounded-xl border border-white/10 hover:border-emerald-500/50 hover:bg-white/5 transition-all duration-200 group"
+                onFocus={() => setFocusedOptionIndex(index)}
+                className={`w-full text-left p-4 sm:p-5 rounded-xl border transition-all duration-200 group touch-manipulation active:scale-[0.98] ${
+                  focusedOptionIndex === index
+                    ? 'border-emerald-500 bg-white/5 ring-2 ring-emerald-500/30'
+                    : 'border-white/10 hover:border-emerald-500/50 hover:bg-white/5 active:border-emerald-500'
+                }`}
+                role="radio"
+                aria-checked={focusedOptionIndex === index}
+                aria-label={`Option ${index + 1}: ${option.text}`}
+                tabIndex={focusedOptionIndex === index ? 0 : -1}
               >
                 <div className="flex items-center">
-                  <div className="flex-shrink-0 w-6 h-6 rounded-full border-2 border-neutral-600 group-hover:border-emerald-500 mr-4 transition-colors" />
-                  <span className="text-lg text-neutral-300 group-hover:text-white transition-colors">
+                  <div 
+                    className={`flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 mr-3 sm:mr-4 transition-colors ${
+                      focusedOptionIndex === index
+                        ? 'border-emerald-500 bg-emerald-500/20'
+                        : 'border-neutral-600 group-hover:border-emerald-500 group-active:border-emerald-500'
+                    }`}
+                    aria-hidden="true"
+                  />
+                  <span className={`text-base sm:text-lg transition-colors ${
+                    focusedOptionIndex === index
+                      ? 'text-white font-medium'
+                      : 'text-neutral-300 group-hover:text-white group-active:text-white'
+                  }`}>
                     {option.text}
                   </span>
                 </div>
@@ -355,9 +537,10 @@ export default function AssessmentPage() {
           {currentQuestion > 0 && (
             <button
               onClick={handleBack}
-              className="mt-6 px-6 py-3 bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white rounded-xl font-medium transition-all border border-white/10 hover:border-white/20 flex items-center gap-2"
+              className="mt-4 sm:mt-6 px-4 sm:px-6 py-2.5 sm:py-3 bg-white/5 hover:bg-white/10 active:bg-white/15 text-neutral-300 hover:text-white rounded-xl font-medium transition-all border border-white/10 hover:border-white/20 flex items-center gap-2 touch-manipulation active:scale-[0.98]"
+              aria-label="Go back to previous question"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               Previous Question
@@ -366,8 +549,17 @@ export default function AssessmentPage() {
         </div>
         
         {/* Info text */}
-        <p className="text-center text-neutral-500 mt-6 text-sm">
+        <p 
+          id="question-instructions"
+          className="text-center text-neutral-500 mt-6 text-sm"
+          role="note"
+          aria-live="polite"
+        >
           Choose the option that feels most natural to you. There are no right or wrong answers.
+          <span className="sr-only">
+            {' '}Use arrow keys to navigate, Enter or Space to select, or press 1-{question.options.length} to choose directly.
+            {currentQuestion > 0 && ' Press Backspace to go back.'}
+          </span>
         </p>
       </div>
     </div>

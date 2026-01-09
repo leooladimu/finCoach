@@ -23,6 +23,19 @@ export const metadata: Metadata = {
     icon: '/favicon.svg',
     apple: '/apple-icon.png?v=2',
   },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+    viewportFit: 'cover', // For notched devices
+  },
+  themeColor: '#000000',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'FinCoach',
+  },
 };
 
 export default function RootLayout({

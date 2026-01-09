@@ -656,40 +656,70 @@ export const assessmentQuestions: AssessmentQuestion[] = [
 
 // Map MBTI type to Money Style descriptions
 export const moneyStyleDescriptions: Record<string, string> = {
-  ESTJ: 'The Organizer - You thrive on structure and clear financial systems. You value efficiency and practical results.',
-  ESTP: 'The Opportunist - You spot chances to leverage money in the moment. You prefer action over lengthy planning.',
-  ESFJ: 'The Provider - You prioritize financial security for your loved ones. Giving and supporting others motivates you.',
-  ESFP: 'The Enthusiast - You enjoy spending on experiences and people. You believe money should enhance life now.',
-  ENTJ: 'The Strategist - You see money as a tool for achieving ambitious goals. Long-term vision drives your decisions.',
-  ENTP: 'The Innovator - You explore creative financial opportunities. You love testing new approaches to wealth building.',
-  ENFJ: 'The Idealist - You align spending with your values and community impact. Purpose matters more than profit.',
-  ENFP: 'The Dreamer - You invest in possibilities and personal growth. Financial freedom means pursuing your passions.',
-  ISTJ: 'The Guardian - You build wealth through careful planning and discipline. Tradition and stability guide you.',
-  ISTP: 'The Pragmatist - You focus on what works efficiently. You prefer hands-on financial management.',
-  ISFJ: 'The Protector - You save diligently to ensure security. You value loyalty and helping others quietly.',
-  ISFP: 'The Artist - You spend on what brings beauty and meaning. Financial choices reflect your personal values.',
-  INTJ: 'The Architect - You design comprehensive financial systems. You trust data and long-term projections.',
-  INTP: 'The Analyst - You study financial concepts deeply. You optimize based on logical principles.',
-  INFJ: 'The Counselor - You seek financial harmony with your life purpose. You plan carefully for meaningful futures.',
-  INFP: 'The Seeker - You want your money to reflect your ideals. Authenticity matters more than convention.',
+  ESTJ: 'The Organizer - You excel at creating structured financial systems and take pride in efficiency. You make decisions based on proven methods and practical outcomes. Your strength lies in disciplined execution and maintaining control over your finances. You feel most confident when you have clear plans, timelines, and metrics to track your progress.',
+  
+  ESTP: 'The Opportunist - You thrive on spotting immediate financial opportunities and taking calculated risks. You prefer action over lengthy planning and trust your ability to adapt quickly. Your strength is leveraging market timing and real-world experience. You work best with flexible strategies that allow you to pivot when you see a better opportunity.',
+  
+  ESFJ: 'The Provider - You find deep satisfaction in using money to care for and support your loved ones. Financial security for your family and community is your primary driver. Your strength lies in building stable foundations and creating safety nets. You feel most fulfilled when your financial decisions benefit the people you care about.',
+  
+  ESFP: 'The Enthusiast - You believe money should enhance life experiences and meaningful connections. You prioritize enjoying the present while building for tomorrow. Your strength is finding joy in the journey and creating memorable moments. You thrive when you can balance spontaneity with smart financial choices that don\'t restrict your lifestyle.',
+  
+  ENTJ: 'The Strategist - You view money as a powerful tool for achieving ambitious long-term goals. You naturally think in systems and leverage resources strategically. Your strength lies in creating comprehensive plans and executing with confidence. You excel when given big-picture objectives and the autonomy to optimize your approach.',
+  
+  ENTP: 'The Innovator - You love exploring unconventional financial strategies and testing new investment ideas. You see patterns others miss and enjoy intellectual challenges. Your strength is adaptability and creative problem-solving in complex situations. You thrive when experimenting with multiple income streams and cutting-edge opportunities.',
+  
+  ENFJ: 'The Idealist - Your financial decisions are deeply connected to your values and desire to make a positive impact. You naturally consider how money affects relationships and community. Your strength lies in aligning resources with purpose and inspiring others. You feel most aligned when your spending and investing reflect your vision for a better world.',
+  
+  ENFP: 'The Dreamer - You invest in personal growth, possibilities, and experiences that fuel your passions. Financial freedom means having options to pursue what excites you. Your strength is seeing potential everywhere and maintaining optimism. You work best with flexible frameworks that support your diverse interests and evolving goals.',
+  
+  ISTJ: 'The Guardian - You build wealth through methodical planning, consistency, and time-tested principles. You value security, tradition, and doing things the proven way. Your strength lies in discipline, thoroughness, and following through on commitments. You excel with structured plans, detailed budgets, and reliable long-term strategies.',
+  
+  ISTP: 'The Pragmatist - You focus on practical, hands-on financial management that delivers tangible results. You prefer understanding exactly how things work before committing. Your strength is efficiency and cutting through complexity to what matters. You thrive with tools and systems you can control directly, avoiding unnecessary overhead.',
+  
+  ISFJ: 'The Protector - You save diligently and plan carefully to ensure security for yourself and those you care about. You value loyalty, stability, and helping others in meaningful ways. Your strength lies in consistent habits and protective planning. You feel most comfortable with conservative, proven approaches that minimize risk to your foundation.',
+  
+  ISFP: 'The Artist - You make financial choices that reflect your personal values and authentic self. Beauty, meaning, and harmony guide your decisions more than convention. Your strength is staying true to yourself and creating a lifestyle that feels right. You work best when given freedom to spend on what truly matters to you.',
+  
+  INTJ: 'The Architect - You design comprehensive financial systems based on data, logic, and long-term projections. You trust your analysis and commit fully to well-researched strategies. Your strength lies in strategic thinking and systematic optimization. You excel when you can build custom frameworks tailored to your unique goals and risk tolerance.',
+  
+  INTP: 'The Analyst - You approach money with intellectual curiosity, studying concepts deeply before acting. You seek to understand underlying principles and optimize based on logic. Your strength is analytical rigor and finding inefficiencies others overlook. You thrive when given complex problems to solve and freedom to explore unconventional solutions.',
+  
+  INFJ: 'The Counselor - You seek financial harmony with your life purpose and long-term vision. You plan carefully for meaningful futures while staying attuned to deeper motivations. Your strength lies in holistic thinking and aligning resources with values. You feel most aligned when money serves your personal growth and contributes to something larger than yourself.',
+  
+  INFP: 'The Seeker - You want every financial decision to reflect your core ideals and authentic values. Conventional success matters less than living in alignment with who you are. Your strength is maintaining integrity and staying true to your principles. You work best when you understand how money can support your unique path and creative expression.',
 };
 
 // Map MBTI type to coaching approach
 export const coachingApproaches: Record<string, string> = {
-  ESTJ: 'Direct, structured guidance with clear action steps and measurable outcomes.',
-  ESTP: 'Dynamic, opportunity-focused coaching with immediate tactical wins.',
-  ESFJ: 'Supportive, relationship-centered guidance that honors your caregiving role.',
-  ESFP: 'Energizing, present-focused coaching that balances enjoyment with goals.',
-  ENTJ: 'Strategic, ambitious guidance aligned with your vision of success.',
-  ENTP: 'Exploratory, innovative coaching that encourages testing new ideas.',
-  ENFJ: 'Inspirational, values-driven guidance that connects money to purpose.',
-  ENFP: 'Creative, possibility-focused coaching that supports your diverse interests.',
-  ISTJ: 'Methodical, reliable guidance with proven systems and detailed plans.',
-  ISTP: 'Practical, efficient coaching focused on what works for you.',
-  ISFJ: 'Gentle, protective guidance that respects your cautious nature.',
-  ISFP: 'Personalized, values-aligned coaching that honors your unique path.',
-  INTJ: 'Analytical, systems-focused guidance with comprehensive frameworks.',
-  INTP: 'Conceptual, logic-based coaching that explores underlying principles.',
-  INFJ: 'Holistic, meaning-focused guidance that integrates money with life vision.',
-  INFP: 'Reflective, authentic coaching that aligns finances with your ideals.',
+  ESTJ: 'I\'ll provide you with clear, step-by-step action plans with specific deadlines and measurable milestones. We\'ll build efficient systems, track progress with concrete metrics, and focus on proven strategies that deliver results. You\'ll get structured check-ins and direct feedback on your execution.',
+  
+  ESTP: 'We\'ll focus on immediate, tactical wins and opportunities you can act on today. I\'ll help you build flexible strategies that adapt to market changes while maintaining core financial discipline. Expect dynamic guidance that respects your need for autonomy while capitalizing on your instinct for timing.',
+  
+  ESFJ: 'I\'ll work with you to create financial plans that protect and provide for the people you care about. We\'ll build security systems that give you peace of mind and explore how your resources can make a meaningful difference. Our coaching will honor your caregiving role while ensuring you don\'t neglect your own financial wellbeing.',
+  
+  ESFP: 'Together, we\'ll design a financial plan that supports your vibrant lifestyle without sacrificing long-term stability. I\'ll help you find the sweet spot between enjoying life now and building for tomorrow. Expect practical strategies that feel natural, not restrictive, so money enhances rather than limits your experiences.',
+  
+  ENTJ: 'I\'ll partner with you to develop ambitious, comprehensive financial strategies aligned with your long-term vision. We\'ll create scalable systems, leverage optimization opportunities, and focus on high-impact moves. You\'ll get strategic frameworks with the autonomy to execute them your way, plus data-driven insights to fuel your decisions.',
+  
+  ENTP: 'We\'ll explore innovative financial strategies and experiment with multiple approaches to find what works best. I\'ll challenge your thinking, introduce unconventional ideas, and help you test theories in controlled ways. Expect intellectual engagement, creative problem-solving, and freedom to explore diverse opportunities.',
+  
+  ENFJ: 'I\'ll help you align your financial decisions with your deepest values and vision for positive impact. We\'ll explore conscious investing, values-based spending, and how money can serve your purpose. Our work will connect your resources to meaning while ensuring you build the foundation needed to sustain your contributions.',
+  
+  ENFP: 'Together, we\'ll create flexible financial frameworks that support all your interests and evolving passions. I\'ll help you channel your enthusiasm into sustainable strategies without boxing you in. Expect creative solutions, growth-focused investing, and permission to pursue what lights you up while building real financial freedom.',
+  
+  ISTJ: 'I\'ll provide you with detailed, proven financial systems and step-by-step implementation plans. We\'ll use time-tested strategies, thorough analysis, and careful risk management. You\'ll get comprehensive documentation, regular reviews, and reliable guidance you can trust for the long haul.',
+  
+  ISTP: 'We\'ll cut through complexity to focus on practical, efficient strategies you can implement yourself. I\'ll show you exactly how everything works, give you direct control over your systems, and eliminate unnecessary overhead. Expect hands-on tools, logical explanations, and straightforward approaches that deliver results.',
+  
+  ISFJ: 'I\'ll work with you gently and patiently to build strong financial foundations that protect what matters most. We\'ll use conservative, proven strategies that prioritize security and minimize risk. Our approach will respect your cautious nature while gradually expanding your comfort zone at your own pace.',
+  
+  ISFP: 'Together, we\'ll create a personalized financial path that honors your unique values and authentic self. I\'ll help you make choices that feel right, not just look good on paper. Expect freedom to spend on what brings you meaning, creative approaches to wealth-building, and respect for your individual journey.',
+  
+  INTJ: 'I\'ll collaborate with you to design comprehensive, custom financial frameworks based on rigorous analysis and data. We\'ll build sophisticated systems optimized for your specific goals and risk profile. You\'ll get strategic models, logical frameworks, and the independence to execute your vision with precision.',
+  
+  INTP: 'We\'ll dive deep into financial concepts, exploring underlying principles and optimizing based on logic. I\'ll provide intellectual challenges, unconventional solutions, and freedom to analyze before acting. Expect thorough explanations, complex problem-solving, and respect for your need to understand the "why" behind every recommendation.',
+  
+  INFJ: 'I\'ll help you create financial harmony between your resources and life purpose, connecting money to meaning. We\'ll develop holistic strategies that serve your long-term vision while honoring your need for alignment. Our work will integrate your financial, personal, and spiritual growth into a cohesive path forward.',
+  
+  INFP: 'Together, we\'ll ensure every financial decision reflects your core values and supports your authentic path. I\'ll help you build wealth in ways that feel true to who you are, not who you "should" be. Expect reflective guidance, creative solutions, and permission to define success on your own terms.',
 };
