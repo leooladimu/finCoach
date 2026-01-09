@@ -172,37 +172,32 @@ export default function PlanPage() {
   };
 
   const priorityColors = {
-    high: 'from-red-700 to-red-800 border-red-900',
-    medium: 'from-amber-700 to-amber-800 border-amber-900',
-    low: 'from-green-700 to-green-800 border-green-900',
+    high: 'from-red-500 to-red-400 border-red-500',
+    medium: 'from-orange-500 to-orange-400 border-orange-500',
+    low: 'from-emerald-500 to-emerald-400 border-emerald-500',
   };
 
   const priorityBgColors = {
-    high: 'from-red-50 to-amber-50',
-    medium: 'from-amber-50 to-yellow-50',
-    low: 'from-green-50 to-emerald-50',
+    high: 'border-red-500/30 bg-red-500/10',
+    medium: 'border-orange-500/30 bg-orange-500/10',
+    low: 'border-emerald-500/30 bg-emerald-500/10',
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-100 via-amber-50 to-red-50">
+    <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="bg-gradient-to-r from-stone-50/80 to-amber-50/80 backdrop-blur-sm shadow-lg border-b-2 border-amber-800/30">
+      <header className="bg-black/50 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="text-2xl">💰</div>
-              <span className="text-2xl font-serif font-bold tracking-tight">
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-900 via-red-900 to-amber-800">
-                  Fin
-                </span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-800 via-orange-900 to-red-900">
-                  Coach
-                </span>
+              <span className="text-2xl font-bold tracking-tight gradient-text">
+                FinCoach
               </span>
             </Link>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-stone-800 font-serif italic">Welcome back!</span>
-              <Link href="/profile" className="w-10 h-10 bg-gradient-to-br from-amber-800 to-red-900 rounded-full flex items-center justify-center text-stone-50 font-serif font-semibold border-2 border-amber-900/40 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+              <span className="text-sm text-neutral-400">Welcome back!</span>
+              <Link href="/profile" className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white font-semibold hover:bg-emerald-600 transition-colors cursor-pointer">
                 U
               </Link>
             </div>
@@ -211,22 +206,22 @@ export default function PlanPage() {
       </header>
       
       {/* Mode Selector */}
-      <div className="bg-gradient-to-r from-stone-50/80 to-amber-50/80 backdrop-blur-sm border-b-2 border-amber-800/30">
+      <div className="bg-black/50 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex gap-8">
             <Link
               href="/goals"
-              className="py-4 px-1 border-b-2 border-transparent text-stone-700/70 hover:text-stone-900 hover:border-amber-700 font-serif font-medium text-sm"
+              className="py-4 px-1 border-b-2 border-transparent text-neutral-400 hover:text-white hover:border-emerald-500 font-medium text-sm transition-colors"
             >
               🎯 Goals
             </Link>
             <Link
               href="/behavior"
-              className="py-4 px-1 border-b-2 border-transparent text-stone-700/70 hover:text-stone-900 hover:border-amber-700 font-serif font-medium text-sm"
+              className="py-4 px-1 border-b-2 border-transparent text-neutral-400 hover:text-white hover:border-emerald-500 font-medium text-sm transition-colors"
             >
               📊 Behavior
             </Link>
-            <button className="py-4 px-1 border-b-2 border-amber-900 text-stone-900 font-serif font-medium text-sm">
+            <button className="py-4 px-1 border-b-2 border-emerald-500 text-white font-medium text-sm">
               📋 Plan
             </button>
           </nav>
@@ -236,18 +231,14 @@ export default function PlanPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-serif font-bold text-stone-900 mb-2">Your Action Plan</h1>
-          <p className="text-stone-700 font-serif">
+          <h1 className="text-3xl font-bold text-white mb-2">Your Action Plan</h1>
+          <p className="text-neutral-400">
             Concrete steps to close the gap between your current behavior and financial goals.
           </p>
         </div>
 
         {/* Progress Summary */}
-        <div className="mb-8 bg-gradient-to-br from-stone-50 to-amber-50 rounded-lg border-4 border-double border-amber-800/40 p-6 shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-amber-900/30" />
-          <div className="absolute top-0 right-0 w-8 h-8 border-r-2 border-t-2 border-amber-900/30" />
-          <div className="absolute bottom-0 left-0 w-8 h-8 border-l-2 border-b-2 border-amber-900/30" />
-          <div className="absolute bottom-0 right-0 w-8 h-8 border-r-2 border-b-2 border-amber-900/30" />
+        <div className="mb-8 glass rounded-2xl border border-white/10 p-6">
           
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
@@ -256,43 +247,43 @@ export default function PlanPage() {
             </div>
             <div>
               <p className="text-sm font-serif text-stone-600 mb-1">Completed</p>
-              <p className="text-3xl font-serif font-bold text-green-800">{completedTasks.length}</p>
+              <p className="text-3xl font-bold text-emerald-400">{completedTasks.length}</p>
             </div>
             <div>
-              <p className="text-sm font-serif text-stone-600 mb-1">In Progress</p>
-              <p className="text-3xl font-serif font-bold text-amber-800">
+              <p className="text-sm text-neutral-400 mb-1">In Progress</p>
+              <p className="text-3xl font-bold text-orange-400">
                 {actionItems.filter(item => !completedTasks.includes(item.id)).length}
               </p>
             </div>
             <div>
-              <p className="text-sm font-serif text-stone-600 mb-1">Potential Savings</p>
-              <p className="text-3xl font-serif font-bold text-green-800">$8K+/year</p>
+              <p className="text-sm text-neutral-400 mb-1">Potential Savings</p>
+              <p className="text-3xl font-bold text-emerald-400">$8K+/year</p>
             </div>
           </div>
         </div>
 
         {/* Quick Wins Section */}
         <div className="mb-12">
-          <h2 className="text-2xl font-serif font-bold text-stone-900 mb-4 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
             <span>⚡</span> Quick Wins
           </h2>
-          <p className="text-stone-700 font-serif mb-4">
+          <p className="text-neutral-400 mb-4">
             Low-effort actions with immediate impact. Start here for momentum.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {quickWins.map((win, index) => (
               <div
                 key={index}
-                className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border-2 border-green-800/30 p-4 shadow-lg hover:shadow-xl transition-shadow"
+                className="glass rounded-xl border border-emerald-500/30 p-4 hover:bg-white/10 transition-all"
               >
                 <div className="text-3xl mb-2">{win.emoji}</div>
-                <h3 className="font-serif font-semibold text-stone-900 mb-2 text-sm">{win.title}</h3>
+                <h3 className="font-semibold text-white mb-2 text-sm">{win.title}</h3>
                 <div className="space-y-1">
-                  <p className="text-xs text-stone-700 font-serif">
-                    <span className="font-semibold">Impact:</span> {win.impact}
+                  <p className="text-xs text-neutral-400">
+                    <span className="font-semibold text-white">Impact:</span> {win.impact}
                   </p>
-                  <p className="text-xs text-stone-700 font-serif">
-                    <span className="font-semibold">Effort:</span> {win.effort}
+                  <p className="text-xs text-neutral-400">
+                    <span className="font-semibold text-white">Effort:</span> {win.effort}
                   </p>
                 </div>
               </div>
@@ -302,8 +293,8 @@ export default function PlanPage() {
 
         {/* Action Items */}
         <div className="mb-12">
-          <h2 className="text-2xl font-serif font-bold text-stone-900 mb-4 flex items-center gap-2">
-            <span>◆</span> Prioritized Actions
+          <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+            <span>📋</span> Prioritized Actions
           </h2>
           <div className="space-y-4">
             {actionItems.map((item) => {
@@ -312,31 +303,26 @@ export default function PlanPage() {
               return (
                 <div
                   key={item.id}
-                  className={`bg-gradient-to-br ${priorityBgColors[item.priority as 'high' | 'medium' | 'low']} rounded-lg border-4 border-double ${isCompleted ? 'border-green-800/40 opacity-60' : 'border-opacity-40 ' + priorityColors[item.priority as 'high' | 'medium' | 'low']} p-6 shadow-xl relative overflow-hidden transition-all`}
+                  className={`glass rounded-2xl border ${priorityBgColors[item.priority as 'high' | 'medium' | 'low']} p-6 ${isCompleted ? 'opacity-60' : ''} transition-all`}
                 >
-                  <div className="absolute top-0 left-0 w-6 h-6 border-l-2 border-t-2 border-stone-800/20" />
-                  <div className="absolute top-0 right-0 w-6 h-6 border-r-2 border-t-2 border-stone-800/20" />
-                  <div className="absolute bottom-0 left-0 w-6 h-6 border-l-2 border-b-2 border-stone-800/20" />
-                  <div className="absolute bottom-0 right-0 w-6 h-6 border-r-2 border-b-2 border-stone-800/20" />
-                  
                   <div className="flex items-start gap-4">
                     <button
                       onClick={() => handleToggleTask(item.id)}
                       className={`flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all ${
                         isCompleted
-                          ? 'bg-green-800 border-green-900'
-                          : 'bg-stone-50 border-stone-400 hover:border-amber-800'
+                          ? 'bg-emerald-500 border-emerald-600'
+                          : 'bg-white/5 border-white/20 hover:border-emerald-500'
                       }`}
                     >
-                      {isCompleted && <span className="text-stone-50 text-lg">✓</span>}
+                      {isCompleted && <span className="text-white text-lg">✓</span>}
                     </button>
                     <span className="text-4xl">{item.emoji}</span>
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <h3 className={`font-serif font-bold text-stone-900 text-lg ${isCompleted ? 'line-through' : ''}`}>
+                        <h3 className={`font-bold text-white text-lg ${isCompleted ? 'line-through' : ''}`}>
                           {item.title}
                         </h3>
-                        <span className={`text-xs font-serif font-semibold px-2 py-1 rounded-full bg-gradient-to-r ${priorityColors[item.priority as 'high' | 'medium' | 'low']} text-stone-50`}>
+                        <span className={`text-xs font-semibold px-2 py-1 rounded-full bg-gradient-to-r ${priorityColors[item.priority as 'high' | 'medium' | 'low']} text-white`}>
                           {item.priority}
                         </span>
                         <span className="text-xs font-serif text-stone-600 bg-stone-50/60 px-2 py-1 rounded-full">

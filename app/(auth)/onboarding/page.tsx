@@ -82,48 +82,47 @@ export default function OnboardingWelcome() {
 
         {/* Main Card */}
         <div className="glass rounded-2xl p-8 border border-white/10">
-
           {/* Step 1: Basic Info */}
           {step === 1 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-serif font-bold text-stone-900 mb-2 flex items-center gap-2">
+                <h2 className="text-2xl font-semibold text-white mb-2 flex items-center gap-2">
                   <span>👋</span> Tell us about yourself
                 </h2>
-                <p className="text-stone-700 font-serif text-sm">
+                <p className="text-neutral-400">
                   We&apos;ll use this to personalize your experience and provide better insights.
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-serif font-semibold text-stone-900 mb-2">
-                  What&apos;s your name? <span className="text-red-800">*</span>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">
+                  What&apos;s your name? <span className="text-emerald-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={profile.name}
                   onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                   placeholder="John Doe"
-                  className="w-full px-4 py-3 bg-stone-50 border-2 border-stone-300 rounded-lg font-serif text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-amber-800 transition-colors"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-neutral-600 focus:outline-none focus:border-emerald-500 transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-serif font-semibold text-stone-900 mb-2">
-                  Email address <span className="text-red-800">*</span>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">
+                  Email address <span className="text-emerald-500">*</span>
                 </label>
                 <input
                   type="email"
                   value={profile.email}
                   onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                   placeholder="john@example.com"
-                  className="w-full px-4 py-3 bg-stone-50 border-2 border-stone-300 rounded-lg font-serif text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-amber-800 transition-colors"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-neutral-600 focus:outline-none focus:border-emerald-500 transition-colors"
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-serif font-semibold text-stone-900 mb-2">
+                  <label className="block text-sm font-medium text-neutral-300 mb-2">
                     Age (optional)
                   </label>
                   <input
@@ -131,11 +130,11 @@ export default function OnboardingWelcome() {
                     value={profile.age}
                     onChange={(e) => setProfile({ ...profile, age: e.target.value })}
                     placeholder="30"
-                    className="w-full px-4 py-3 bg-stone-50 border-2 border-stone-300 rounded-lg font-serif text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-amber-800 transition-colors"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-neutral-600 focus:outline-none focus:border-emerald-500 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-serif font-semibold text-stone-900 mb-2">
+                  <label className="block text-sm font-medium text-neutral-300 mb-2">
                     Occupation (optional)
                   </label>
                   <input
@@ -143,7 +142,7 @@ export default function OnboardingWelcome() {
                     value={profile.occupation}
                     onChange={(e) => setProfile({ ...profile, occupation: e.target.value })}
                     placeholder="Software Engineer"
-                    className="w-full px-4 py-3 bg-stone-50 border-2 border-stone-300 rounded-lg font-serif text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-amber-800 transition-colors"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-neutral-600 focus:outline-none focus:border-emerald-500 transition-colors"
                   />
                 </div>
               </div>
@@ -154,10 +153,10 @@ export default function OnboardingWelcome() {
           {step === 2 && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-2xl font-serif font-bold text-stone-900 mb-2 flex items-center gap-2">
+                <h2 className="text-2xl font-semibold text-white mb-2 flex items-center gap-2">
                   <span>🎯</span> What&apos;s your primary financial goal?
                 </h2>
-                <p className="text-stone-700 font-serif text-sm">
+                <p className="text-neutral-400">
                   Choose the goal that matters most to you right now. You can add more later.
                 </p>
               </div>
@@ -176,21 +175,21 @@ export default function OnboardingWelcome() {
                   <button
                     key={goal.value}
                     onClick={() => setProfile({ ...profile, primaryGoal: goal.value })}
-                    className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
+                    className={`w-full p-4 rounded-xl border text-left transition-all ${
                       profile.primaryGoal === goal.value
-                        ? 'border-amber-800 bg-gradient-to-r from-amber-50 to-red-50 shadow-lg'
-                        : 'border-stone-300 bg-stone-50 hover:border-amber-600 hover:bg-amber-50/50'
+                        ? 'border-emerald-500 bg-emerald-500/10'
+                        : 'border-white/10 bg-white/5 hover:border-emerald-500/50 hover:bg-white/10'
                     }`}
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-3xl">{goal.emoji}</span>
                       <div className="flex-1">
-                        <h3 className="font-serif font-bold text-stone-900">{goal.title}</h3>
-                        <p className="text-sm font-serif text-stone-600">{goal.description}</p>
+                        <h3 className="font-semibold text-white">{goal.title}</h3>
+                        <p className="text-sm text-neutral-400">{goal.description}</p>
                       </div>
                       {profile.primaryGoal === goal.value && (
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-800 to-red-900 flex items-center justify-center">
-                          <span className="text-stone-50 text-sm">✓</span>
+                        <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center">
+                          <span className="text-white text-sm">✓</span>
                         </div>
                       )}
                     </div>
@@ -205,7 +204,7 @@ export default function OnboardingWelcome() {
             {step > 1 && (
               <button
                 onClick={() => setStep(step - 1)}
-                className="px-6 py-3 bg-stone-200 hover:bg-stone-300 text-stone-900 rounded-lg font-serif font-semibold transition-colors"
+                className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-xl font-medium transition-colors border border-white/10"
               >
                 ← Back
               </button>
@@ -213,7 +212,7 @@ export default function OnboardingWelcome() {
             <button
               onClick={handleContinue}
               disabled={step === 1 ? !profile.name || !profile.email : !profile.primaryGoal}
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-amber-800 to-red-900 hover:from-amber-900 hover:to-red-950 text-stone-50 rounded-lg font-serif font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="flex-1 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-semibold shadow-lg shadow-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {step === 2 ? 'Continue to Assessment →' : 'Next →'}
             </button>
@@ -222,7 +221,7 @@ export default function OnboardingWelcome() {
 
         {/* Footer Note */}
         <div className="mt-6 text-center">
-          <p className="text-sm font-serif text-stone-600">
+          <p className="text-sm text-neutral-500">
             Next: Take our 3-minute Money Style assessment to personalize your experience
           </p>
         </div>

@@ -89,27 +89,22 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-100 via-amber-50 to-red-50">
+    <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="bg-gradient-to-r from-stone-50/80 to-amber-50/80 backdrop-blur-sm shadow-lg border-b-2 border-amber-800/30">
+      <header className="bg-black/50 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="text-2xl">💰</div>
-              <span className="text-2xl font-serif font-bold tracking-tight">
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-900 via-red-900 to-amber-800">
-                  Fin
-                </span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-800 via-orange-900 to-red-900">
-                  Coach
-                </span>
+              <span className="text-2xl font-bold tracking-tight gradient-text">
+                FinCoach
               </span>
             </Link>
             <div className="flex items-center gap-4">
-              <Link href="/goals" className="text-sm text-stone-800 font-serif hover:text-amber-900 transition-colors">
+              <Link href="/goals" className="text-sm text-neutral-400 hover:text-white transition-colors">
                 Dashboard
               </Link>
-              <div className="w-10 h-10 bg-gradient-to-br from-amber-800 to-red-900 rounded-full flex items-center justify-center text-stone-50 font-serif font-semibold border-2 border-amber-900/40 shadow-md">
+              <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white font-semibold">
                 {profile.name.charAt(0).toUpperCase() || 'U'}
               </div>
             </div>
@@ -120,28 +115,22 @@ export default function ProfilePage() {
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-serif font-bold text-stone-900 mb-2">Your Profile</h1>
-          <p className="text-stone-700 font-serif">
+          <h1 className="text-3xl font-bold text-white mb-2">Your Profile</h1>
+          <p className="text-neutral-400">
             Manage your personal information and financial preferences
           </p>
         </div>
 
         {/* Profile Card */}
-        <div className="bg-gradient-to-br from-stone-50 to-amber-50 rounded-lg border-4 border-double border-amber-800/40 p-8 shadow-xl relative overflow-hidden mb-6">
-          {/* Corner Decorations */}
-          <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-amber-900/30" />
-          <div className="absolute top-0 right-0 w-8 h-8 border-r-2 border-t-2 border-amber-900/30" />
-          <div className="absolute bottom-0 left-0 w-8 h-8 border-l-2 border-b-2 border-amber-900/30" />
-          <div className="absolute bottom-0 right-0 w-8 h-8 border-r-2 border-b-2 border-amber-900/30" />
-
+        <div className="glass rounded-2xl border border-white/10 p-8 mb-6">
           <div className="flex justify-between items-start mb-6">
-            <h2 className="text-2xl font-serif font-bold text-stone-900 flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
               <span>👤</span> Personal Information
             </h2>
             {!isEditing ? (
               <button
                 onClick={() => setIsEditing(true)}
-                className="px-4 py-2 bg-amber-800 hover:bg-amber-900 text-stone-50 rounded-lg font-serif font-semibold text-sm transition-colors"
+                className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-semibold text-sm transition-colors"
               >
                 Edit Profile
               </button>
@@ -149,13 +138,13 @@ export default function ProfilePage() {
               <div className="flex gap-2">
                 <button
                   onClick={handleCancel}
-                  className="px-4 py-2 bg-stone-300 hover:bg-stone-400 text-stone-900 rounded-lg font-serif font-semibold text-sm transition-colors"
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white rounded-xl font-semibold text-sm transition-colors border border-white/10"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
-                  className="px-4 py-2 bg-green-700 hover:bg-green-800 text-stone-50 rounded-lg font-serif font-semibold text-sm transition-colors"
+                  className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-semibold text-sm transition-colors"
                 >
                   Save Changes
                 </button>
@@ -166,48 +155,48 @@ export default function ProfilePage() {
           {isEditing ? (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-serif font-semibold text-stone-900 mb-2">
+                <label className="block text-sm font-semibold text-white mb-2">
                   Name
                 </label>
                 <input
                   type="text"
                   value={editedProfile.name}
                   onChange={(e) => setEditedProfile({ ...editedProfile, name: e.target.value })}
-                  className="w-full px-4 py-3 bg-stone-50 border-2 border-stone-300 rounded-lg font-serif text-stone-900 focus:outline-none focus:border-amber-800 transition-colors"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500 transition-colors"
                 />
               </div>
               <div>
-                <label className="block text-sm font-serif font-semibold text-stone-900 mb-2">
+                <label className="block text-sm font-semibold text-white mb-2">
                   Email
                 </label>
                 <input
                   type="email"
                   value={editedProfile.email}
                   onChange={(e) => setEditedProfile({ ...editedProfile, email: e.target.value })}
-                  className="w-full px-4 py-3 bg-stone-50 border-2 border-stone-300 rounded-lg font-serif text-stone-900 focus:outline-none focus:border-amber-800 transition-colors"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500 transition-colors"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-serif font-semibold text-stone-900 mb-2">
+                  <label className="block text-sm font-semibold text-white mb-2">
                     Age
                   </label>
                   <input
                     type="number"
                     value={editedProfile.age}
                     onChange={(e) => setEditedProfile({ ...editedProfile, age: e.target.value })}
-                    className="w-full px-4 py-3 bg-stone-50 border-2 border-stone-300 rounded-lg font-serif text-stone-900 focus:outline-none focus:border-amber-800 transition-colors"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500 transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-serif font-semibold text-stone-900 mb-2">
+                  <label className="block text-sm font-semibold text-white mb-2">
                     Occupation
                   </label>
                   <input
                     type="text"
                     value={editedProfile.occupation}
                     onChange={(e) => setEditedProfile({ ...editedProfile, occupation: e.target.value })}
-                    className="w-full px-4 py-3 bg-stone-50 border-2 border-stone-300 rounded-lg font-serif text-stone-900 focus:outline-none focus:border-amber-800 transition-colors"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500 transition-colors"
                   />
                 </div>
               </div>
@@ -215,26 +204,26 @@ export default function ProfilePage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <p className="text-sm font-serif text-stone-600 mb-1">Name</p>
-                <p className="font-serif font-semibold text-stone-900 text-lg">
+                <p className="text-sm text-neutral-400 mb-1">Name</p>
+                <p className="font-semibold text-white text-lg">
                   {profile.name || 'Not set'}
                 </p>
               </div>
               <div>
-                <p className="text-sm font-serif text-stone-600 mb-1">Email</p>
-                <p className="font-serif font-semibold text-stone-900 text-lg">
+                <p className="text-sm text-neutral-400 mb-1">Email</p>
+                <p className="font-semibold text-white text-lg">
                   {profile.email || 'Not set'}
                 </p>
               </div>
               <div>
-                <p className="text-sm font-serif text-stone-600 mb-1">Age</p>
-                <p className="font-serif font-semibold text-stone-900 text-lg">
+                <p className="text-sm text-neutral-400 mb-1">Age</p>
+                <p className="font-semibold text-white text-lg">
                   {profile.age || 'Not set'}
                 </p>
               </div>
               <div>
-                <p className="text-sm font-serif text-stone-600 mb-1">Occupation</p>
-                <p className="font-serif font-semibold text-stone-900 text-lg">
+                <p className="text-sm text-neutral-400 mb-1">Occupation</p>
+                <p className="font-semibold text-white text-lg">
                   {profile.occupation || 'Not set'}
                 </p>
               </div>
@@ -243,81 +232,71 @@ export default function ProfilePage() {
         </div>
 
         {/* Primary Goal Card */}
-        <div className="bg-gradient-to-br from-stone-50 to-amber-50 rounded-lg border-4 border-double border-amber-800/40 p-8 shadow-xl relative overflow-hidden mb-6">
-          <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-amber-900/30" />
-          <div className="absolute top-0 right-0 w-8 h-8 border-r-2 border-t-2 border-amber-900/30" />
-          <div className="absolute bottom-0 left-0 w-8 h-8 border-l-2 border-b-2 border-amber-900/30" />
-          <div className="absolute bottom-0 right-0 w-8 h-8 border-r-2 border-b-2 border-amber-900/30" />
-
-          <h2 className="text-2xl font-serif font-bold text-stone-900 mb-4 flex items-center gap-2">
+        <div className="glass rounded-2xl border border-white/10 p-8 mb-6">
+          <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
             <span>🎯</span> Primary Financial Goal
           </h2>
           
           {profile.primaryGoal && goalLabels[profile.primaryGoal] ? (
-            <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-amber-50 to-red-50 rounded-lg border-2 border-amber-800/30">
+            <div className="flex items-center gap-4 p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/30">
               <span className="text-5xl">{goalLabels[profile.primaryGoal].emoji}</span>
               <div>
-                <h3 className="font-serif font-bold text-stone-900 text-xl">
+                <h3 className="font-bold text-white text-xl">
                   {goalLabels[profile.primaryGoal].title}
                 </h3>
                 <Link 
                   href="/goals"
-                  className="text-sm font-serif text-amber-900 hover:text-amber-700 transition-colors"
+                  className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors"
                 >
                   View all goals →
                 </Link>
               </div>
             </div>
           ) : (
-            <p className="text-stone-700 font-serif">
-              No primary goal set. <Link href="/onboarding" className="text-amber-900 hover:text-amber-700 font-semibold">Complete onboarding</Link>
+            <p className="text-neutral-400">
+              No primary goal set. <Link href="/onboarding" className="text-emerald-400 hover:text-emerald-300 font-semibold">Complete onboarding</Link>
             </p>
           )}
         </div>
 
         {/* Money Style Card */}
         {moneyStyle && (
-          <div className="bg-gradient-to-br from-stone-50 to-amber-50 rounded-lg border-4 border-double border-amber-800/40 p-8 shadow-xl relative overflow-hidden mb-6">
-            <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-amber-900/30" />
-            <div className="absolute top-0 right-0 w-8 h-8 border-r-2 border-t-2 border-amber-900/30" />
-            <div className="absolute bottom-0 left-0 w-8 h-8 border-l-2 border-b-2 border-amber-900/30" />
-            <div className="absolute bottom-0 right-0 w-8 h-8 border-r-2 border-b-2 border-amber-900/30" />
-
-            <h2 className="text-2xl font-serif font-bold text-stone-900 mb-4 flex items-center gap-2">
+          <div className="glass rounded-2xl border border-white/10 p-8 mb-6">
+            <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
               <span>🧠</span> Your Money Style
             </h2>
             
             <div className="space-y-4">
               <div>
-                <p className="text-sm font-serif text-stone-600 mb-1">Personality Type</p>
-                <p className="font-serif font-bold text-stone-900 text-3xl mb-2">{moneyStyle.type}</p>
-                <p className="font-serif text-stone-800 leading-relaxed">
+                <p className="text-sm text-neutral-400 mb-1">Personality Type</p>
+                <p className="font-bold text-white text-3xl mb-2">{moneyStyle.type}</p>
+                <p className="text-neutral-400 leading-relaxed">
                   {moneyStyle.moneyStyleDescription}
                 </p>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-stone-300">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-white/10">
                 <div>
-                  <p className="text-xs font-serif text-stone-600 mb-1">Energy</p>
-                  <p className="font-serif font-semibold text-stone-900">
+                  <p className="text-xs text-neutral-400 mb-1">Energy</p>
+                  <p className="font-semibold text-white">
                     {moneyStyle.type.charAt(0) === 'E' ? 'Extrovert' : 'Introvert'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs font-serif text-stone-600 mb-1">Information</p>
-                  <p className="font-serif font-semibold text-stone-900">
+                  <p className="text-xs text-neutral-400 mb-1">Information</p>
+                  <p className="font-semibold text-white">
                     {moneyStyle.type.charAt(1) === 'S' ? 'Sensing' : 'Intuitive'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs font-serif text-stone-600 mb-1">Decisions</p>
-                  <p className="font-serif font-semibold text-stone-900">
+                  <p className="text-xs text-neutral-400 mb-1">Decisions</p>
+                  <p className="font-semibold text-white">
                     {moneyStyle.type.charAt(2) === 'T' ? 'Thinking' : 'Feeling'}
                   </p>
                 </div>
                 <div>
-                  <p className="text-xs font-serif text-stone-600 mb-1">Structure</p>
-                  <p className="font-serif font-semibold text-stone-900">
+                  <p className="text-xs text-neutral-400 mb-1">Structure</p>
+                  <p className="font-semibold text-white">
                     {moneyStyle.type.charAt(3) === 'J' ? 'Judging' : 'Perceiving'}
                   </p>
                 </div>
@@ -325,7 +304,7 @@ export default function ProfilePage() {
 
               <Link
                 href="/onboarding/assessment"
-                className="inline-block mt-4 px-4 py-2 bg-amber-800 hover:bg-amber-900 text-stone-50 rounded-lg font-serif font-semibold text-sm transition-colors"
+                className="inline-block mt-4 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-semibold text-sm transition-colors"
               >
                 Retake Assessment
               </Link>
@@ -334,73 +313,68 @@ export default function ProfilePage() {
         )}
 
         {/* Quick Actions */}
-        <div className="bg-gradient-to-br from-stone-50 to-amber-50 rounded-lg border-4 border-double border-amber-800/40 p-8 shadow-xl relative overflow-hidden">
-          <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-amber-900/30" />
-          <div className="absolute top-0 right-0 w-8 h-8 border-r-2 border-t-2 border-amber-900/30" />
-          <div className="absolute bottom-0 left-0 w-8 h-8 border-l-2 border-b-2 border-amber-900/30" />
-          <div className="absolute bottom-0 right-0 w-8 h-8 border-r-2 border-b-2 border-amber-900/30" />
-
-          <h2 className="text-2xl font-serif font-bold text-stone-900 mb-4 flex items-center gap-2">
+        <div className="glass rounded-2xl border border-white/10 p-8">
+          <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
             <span>⚡</span> Quick Actions
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Link
               href="/goals"
-              className="p-4 bg-stone-50 hover:bg-amber-50 border-2 border-stone-300 hover:border-amber-800 rounded-lg transition-all group"
+              className="p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all group"
             >
               <div className="flex items-center gap-3">
                 <span className="text-3xl">🎯</span>
                 <div>
-                  <h3 className="font-serif font-semibold text-stone-900 group-hover:text-amber-900">
+                  <h3 className="font-semibold text-white group-hover:text-emerald-400 transition-colors">
                     Manage Goals
                   </h3>
-                  <p className="text-sm font-serif text-stone-600">Add or update your financial goals</p>
+                  <p className="text-sm text-neutral-400">Add or update your financial goals</p>
                 </div>
               </div>
             </Link>
 
             <Link
               href="/behavior"
-              className="p-4 bg-stone-50 hover:bg-amber-50 border-2 border-stone-300 hover:border-amber-800 rounded-lg transition-all group"
+              className="p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all group"
             >
               <div className="flex items-center gap-3">
                 <span className="text-3xl">📊</span>
                 <div>
-                  <h3 className="font-serif font-semibold text-stone-900 group-hover:text-amber-900">
+                  <h3 className="font-semibold text-white group-hover:text-emerald-400 transition-colors">
                     View Insights
                   </h3>
-                  <p className="text-sm font-serif text-stone-600">Check your spending behavior</p>
+                  <p className="text-sm text-neutral-400">See your behavioral patterns</p>
                 </div>
               </div>
             </Link>
 
             <Link
               href="/plan"
-              className="p-4 bg-stone-50 hover:bg-amber-50 border-2 border-stone-300 hover:border-amber-800 rounded-lg transition-all group"
+              className="p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all group"
             >
               <div className="flex items-center gap-3">
                 <span className="text-3xl">📋</span>
                 <div>
-                  <h3 className="font-serif font-semibold text-stone-900 group-hover:text-amber-900">
+                  <h3 className="font-semibold text-white group-hover:text-emerald-400 transition-colors">
                     Action Plan
                   </h3>
-                  <p className="text-sm font-serif text-stone-600">See your prioritized tasks</p>
+                  <p className="text-sm text-neutral-400">See your prioritized tasks</p>
                 </div>
               </div>
             </Link>
 
             <Link
               href="/onboarding"
-              className="p-4 bg-stone-50 hover:bg-amber-50 border-2 border-stone-300 hover:border-amber-800 rounded-lg transition-all group"
+              className="p-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-all group"
             >
               <div className="flex items-center gap-3">
                 <span className="text-3xl">🔄</span>
                 <div>
-                  <h3 className="font-serif font-semibold text-stone-900 group-hover:text-amber-900">
+                  <h3 className="font-semibold text-white group-hover:text-emerald-400 transition-colors">
                     Restart Onboarding
                   </h3>
-                  <p className="text-sm font-serif text-stone-600">Go through setup again</p>
+                  <p className="text-sm text-neutral-400">Go through setup again</p>
                 </div>
               </div>
             </Link>

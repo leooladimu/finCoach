@@ -174,25 +174,20 @@ export default function BehaviorPage() {
   const totalBudget = spendingCategories.reduce((sum, cat) => sum + cat.budget, 0);
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-100 via-amber-50 to-red-50">
+    <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="bg-gradient-to-r from-stone-50/80 to-amber-50/80 backdrop-blur-sm shadow-lg border-b-2 border-amber-800/30">
+      <header className="bg-black/50 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
             <Link href="/" className="flex items-center gap-3 group">
               <div className="text-2xl">💰</div>
-              <span className="text-2xl font-serif font-bold tracking-tight">
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-900 via-red-900 to-amber-800">
-                  Fin
-                </span>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-800 via-orange-900 to-red-900">
-                  Coach
-                </span>
+              <span className="text-2xl font-bold tracking-tight gradient-text">
+                FinCoach
               </span>
             </Link>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-stone-800 font-serif italic">Welcome back!</span>
-              <Link href="/profile" className="w-10 h-10 bg-gradient-to-br from-amber-800 to-red-900 rounded-full flex items-center justify-center text-stone-50 font-serif font-semibold border-2 border-amber-900/40 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+              <span className="text-sm text-neutral-400">Welcome back!</span>
+              <Link href="/profile" className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white font-semibold hover:bg-emerald-600 transition-colors cursor-pointer">
                 U
               </Link>
             </div>
@@ -201,21 +196,21 @@ export default function BehaviorPage() {
       </header>
       
       {/* Mode Selector */}
-      <div className="bg-gradient-to-r from-stone-50/80 to-amber-50/80 backdrop-blur-sm border-b-2 border-amber-800/30">
+      <div className="bg-black/50 backdrop-blur-sm border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex gap-8">
             <Link
               href="/goals"
-              className="py-4 px-1 border-b-2 border-transparent text-stone-700/70 hover:text-stone-900 hover:border-amber-700 font-serif font-medium text-sm"
+              className="py-4 px-1 border-b-2 border-transparent text-neutral-400 hover:text-white hover:border-emerald-500 font-medium text-sm transition-colors"
             >
               🎯 Goals
             </Link>
-            <button className="py-4 px-1 border-b-2 border-amber-900 text-stone-900 font-serif font-medium text-sm">
+            <button className="py-4 px-1 border-b-2 border-emerald-500 text-white font-medium text-sm">
               📊 Behavior
             </button>
             <Link
               href="/plan"
-              className="py-4 px-1 border-b-2 border-transparent text-stone-700/70 hover:text-stone-900 hover:border-amber-700 font-serif font-medium text-sm"
+              className="py-4 px-1 border-b-2 border-transparent text-neutral-400 hover:text-white hover:border-emerald-500 font-medium text-sm transition-colors"
             >
               📋 Plan
             </Link>
@@ -226,8 +221,8 @@ export default function BehaviorPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-serif font-bold text-stone-900 mb-2">Your Spending Behavior</h1>
-          <p className="text-stone-700 font-serif">
+          <h1 className="text-3xl font-bold text-white mb-2">Your Spending Behavior</h1>
+          <p className="text-neutral-400">
             Understanding where your money goes — and why — is the foundation of financial wellness.
           </p>
         </div>
@@ -238,10 +233,10 @@ export default function BehaviorPage() {
             <button
               key={range}
               onClick={() => setTimeRange(range)}
-              className={`px-4 py-2 rounded-lg font-serif font-medium text-sm transition-all ${
+              className={`px-4 py-2 rounded-xl font-medium text-sm transition-all ${
                 timeRange === range
-                  ? 'bg-gradient-to-r from-amber-800 to-red-900 text-stone-50 shadow-md'
-                  : 'bg-stone-50 text-stone-700 hover:bg-stone-100 border border-stone-300'
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-white/5 text-neutral-400 hover:bg-white/10 border border-white/10'
               }`}
             >
               {range.charAt(0).toUpperCase() + range.slice(1)}
@@ -250,25 +245,20 @@ export default function BehaviorPage() {
         </div>
 
         {/* Spending Summary Card */}
-        <div className="mb-8 bg-gradient-to-br from-stone-50 to-amber-50 rounded-lg border-4 border-double border-amber-800/40 p-6 shadow-xl relative overflow-hidden">
-          {/* Corner Decorations */}
-          <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-amber-900/30" />
-          <div className="absolute top-0 right-0 w-8 h-8 border-r-2 border-t-2 border-amber-900/30" />
-          <div className="absolute bottom-0 left-0 w-8 h-8 border-l-2 border-b-2 border-amber-900/30" />
-          <div className="absolute bottom-0 right-0 w-8 h-8 border-r-2 border-b-2 border-amber-900/30" />
+        <div className="mb-8 glass rounded-2xl border border-white/10 p-6">
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <p className="text-sm font-serif text-stone-600 mb-1">Total Spent</p>
-              <p className="text-3xl font-serif font-bold text-red-900">${totalSpent.toLocaleString()}</p>
+              <p className="text-sm text-neutral-400 mb-1">Total Spent</p>
+              <p className="text-3xl font-bold text-red-400">${totalSpent.toLocaleString()}</p>
             </div>
             <div>
-              <p className="text-sm font-serif text-stone-600 mb-1">Total Budget</p>
-              <p className="text-3xl font-serif font-bold text-stone-800">${totalBudget.toLocaleString()}</p>
+              <p className="text-sm text-neutral-400 mb-1">Total Budget</p>
+              <p className="text-3xl font-bold text-white">${totalBudget.toLocaleString()}</p>
             </div>
             <div>
-              <p className="text-sm font-serif text-stone-600 mb-1">Difference</p>
-              <p className={`text-3xl font-serif font-bold ${totalSpent > totalBudget ? 'text-red-800' : 'text-green-800'}`}>
+              <p className="text-sm text-neutral-400 mb-1">Difference</p>
+              <p className={`text-3xl font-bold ${totalSpent > totalBudget ? 'text-red-400' : 'text-emerald-400'}`}>
                 {totalSpent > totalBudget ? '+' : ''}${(totalSpent - totalBudget).toLocaleString()}
               </p>
             </div>
@@ -280,15 +270,9 @@ export default function BehaviorPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-8 bg-gradient-to-br from-stone-50 to-amber-50 rounded-lg border-4 border-double border-amber-800/40 p-6 shadow-xl relative overflow-hidden"
+          className="mb-8 glass rounded-2xl border border-white/10 p-6"
         >
-          {/* Corner Decorations */}
-          <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-amber-900/30" />
-          <div className="absolute top-0 right-0 w-8 h-8 border-r-2 border-t-2 border-amber-900/30" />
-          <div className="absolute bottom-0 left-0 w-8 h-8 border-l-2 border-b-2 border-amber-900/30" />
-          <div className="absolute bottom-0 right-0 w-8 h-8 border-r-2 border-b-2 border-amber-900/30" />
-          
-          <h2 className="text-2xl font-serif font-bold text-stone-900 mb-6 flex items-center gap-2">
+          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
             <span>📈</span> Spending Trends
           </h2>
           
@@ -332,20 +316,21 @@ export default function BehaviorPage() {
               }, [timeRange])}
               margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#d6d3d1" opacity={0.3} />
-              <XAxis dataKey="name" stroke="#78716c" style={{ fontSize: '12px', fontFamily: 'serif' }} />
-              <YAxis stroke="#78716c" style={{ fontSize: '12px', fontFamily: 'serif' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#525252" opacity={0.2} />
+              <XAxis dataKey="name" stroke="#a3a3a3" style={{ fontSize: '12px' }} />
+              <YAxis stroke="#a3a3a3" style={{ fontSize: '12px' }} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#fafaf9',
-                  border: '2px solid #d97706',
-                  borderRadius: '8px',
-                  fontFamily: 'serif',
+                  backgroundColor: '#171717',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '12px',
                 }}
+                labelStyle={{ color: '#ffffff' }}
+                itemStyle={{ color: '#a3a3a3' }}
               />
-              <Legend wrapperStyle={{ fontFamily: 'serif', fontSize: '14px' }} />
-              <Line type="monotone" dataKey="spending" stroke="#b91c1c" strokeWidth={3} name="Actual Spending" />
-              <Line type="monotone" dataKey="budget" stroke="#78716c" strokeWidth={2} strokeDasharray="5 5" name="Budget" />
+              <Legend wrapperStyle={{ fontSize: '14px' }} />
+              <Line type="monotone" dataKey="spending" stroke="#ef4444" strokeWidth={3} name="Actual Spending" />
+              <Line type="monotone" dataKey="budget" stroke="#a3a3a3" strokeWidth={2} strokeDasharray="5 5" name="Budget" />
             </LineChart>
           </ResponsiveContainer>
         </motion.div>
@@ -357,15 +342,9 @@ export default function BehaviorPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="bg-gradient-to-br from-stone-50 to-amber-50 rounded-lg border-4 border-double border-amber-800/40 p-6 shadow-xl relative overflow-hidden"
+            className="glass rounded-2xl border border-white/10 p-6"
           >
-            {/* Corner Decorations */}
-            <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-amber-900/30" />
-            <div className="absolute top-0 right-0 w-8 h-8 border-r-2 border-t-2 border-amber-900/30" />
-            <div className="absolute bottom-0 left-0 w-8 h-8 border-l-2 border-b-2 border-amber-900/30" />
-            <div className="absolute bottom-0 right-0 w-8 h-8 border-r-2 border-b-2 border-amber-900/30" />
-            
-            <h2 className="text-xl font-serif font-bold text-stone-900 mb-6 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
               <span>📊</span> Budget vs Actual
             </h2>
             
@@ -378,27 +357,28 @@ export default function BehaviorPage() {
                 }))}
                 margin={{ top: 20, right: 10, left: -20, bottom: 80 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#d6d3d1" opacity={0.3} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#525252" opacity={0.2} />
                 <XAxis
                   dataKey="name"
-                  stroke="#78716c"
+                  stroke="#a3a3a3"
                   angle={-45}
                   textAnchor="end"
                   height={100}
-                  style={{ fontSize: '10px', fontFamily: 'serif' }}
+                  style={{ fontSize: '10px' }}
                 />
-                <YAxis stroke="#78716c" style={{ fontSize: '11px', fontFamily: 'serif' }} />
+                <YAxis stroke="#a3a3a3" style={{ fontSize: '11px' }} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: '#fafaf9',
-                    border: '2px solid #d97706',
-                    borderRadius: '8px',
-                    fontFamily: 'serif',
+                    backgroundColor: '#171717',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                    borderRadius: '12px',
                   }}
+                  labelStyle={{ color: '#ffffff' }}
+                  itemStyle={{ color: '#a3a3a3' }}
                 />
-                <Legend wrapperStyle={{ fontFamily: 'serif', fontSize: '13px' }} />
-                <Bar dataKey="Budget" fill="#78716c" radius={[8, 8, 0, 0]} />
-                <Bar dataKey="Actual" fill="#b91c1c" radius={[8, 8, 0, 0]} />
+                <Legend wrapperStyle={{ fontSize: '13px' }} />
+                <Bar dataKey="Budget" fill="#a3a3a3" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="Actual" fill="#10b981" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </motion.div>
@@ -408,15 +388,9 @@ export default function BehaviorPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="bg-gradient-to-br from-stone-50 to-amber-50 rounded-lg border-4 border-double border-amber-800/40 p-6 shadow-xl relative overflow-hidden"
+            className="glass rounded-2xl border border-white/10 p-6"
           >
-            {/* Corner Decorations */}
-            <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-amber-900/30" />
-            <div className="absolute top-0 right-0 w-8 h-8 border-r-2 border-t-2 border-amber-900/30" />
-            <div className="absolute bottom-0 left-0 w-8 h-8 border-l-2 border-b-2 border-amber-900/30" />
-            <div className="absolute bottom-0 right-0 w-8 h-8 border-r-2 border-b-2 border-amber-900/30" />
-            
-            <h2 className="text-xl font-serif font-bold text-stone-900 mb-6 flex items-center gap-2">
+            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
               <span>🥧</span> Spending Distribution
             </h2>
             
@@ -463,8 +437,8 @@ export default function BehaviorPage() {
 
         {/* Spending Categories */}
         <div className="mb-12">
-          <h2 className="text-2xl font-serif font-bold text-stone-900 mb-4 flex items-center gap-2">
-            <span>◆</span> Spending by Category (Details)
+          <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+            <span>📊</span> Spending by Category (Details)
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {spendingCategories.map((category) => {
@@ -474,24 +448,24 @@ export default function BehaviorPage() {
               return (
                 <div
                   key={category.name}
-                  className="bg-gradient-to-br from-stone-50 to-amber-50 rounded-lg border-2 border-amber-800/30 p-5 shadow-lg hover:shadow-xl transition-shadow"
+                  className="glass rounded-xl border border-white/10 p-5 hover:bg-white/10 transition-all"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <span className="text-2xl">{category.emoji}</span>
                       <div>
-                        <h3 className="font-serif font-semibold text-stone-900">{category.name}</h3>
-                        <p className="text-xs text-stone-600 font-serif">{category.percent}% of spending</p>
+                        <h3 className="font-semibold text-white">{category.name}</h3>
+                        <p className="text-xs text-neutral-400">{category.percent}% of spending</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-serif font-bold text-stone-900">${category.amount.toLocaleString()}</p>
-                      <p className="text-xs text-stone-600 font-serif">of ${category.budget.toLocaleString()}</p>
+                      <p className="font-bold text-white">${category.amount.toLocaleString()}</p>
+                      <p className="text-xs text-neutral-400">of ${category.budget.toLocaleString()}</p>
                     </div>
                   </div>
                   
                   {/* Progress Bar */}
-                  <div className="relative h-3 bg-stone-200 rounded-full overflow-hidden">
+                  <div className="relative h-3 bg-white/5 rounded-full overflow-hidden">
                     <div
                       className={`h-full bg-gradient-to-r ${category.color} transition-all duration-500`}
                       style={{ width: `${Math.min(percentOfBudget, 100)}%` }}
@@ -499,14 +473,14 @@ export default function BehaviorPage() {
                   </div>
                   
                   <div className="mt-2 flex items-center justify-between">
-                    <span className={`text-xs font-serif font-medium ${isOverBudget ? 'text-red-800' : 'text-green-800'}`}>
+                    <span className={`text-xs font-medium ${isOverBudget ? 'text-red-400' : 'text-emerald-400'}`}>
                       {isOverBudget ? (
                         <>+${(category.amount - category.budget).toLocaleString()} over</>
                       ) : (
                         <>${(category.budget - category.amount).toLocaleString()} under</>
                       )}
                     </span>
-                    <span className="text-xs font-serif text-stone-600">
+                    <span className="text-xs text-neutral-400">
                       {percentOfBudget.toFixed(0)}% of budget
                     </span>
                   </div>
@@ -518,42 +492,42 @@ export default function BehaviorPage() {
 
         {/* Contradictions & Insights */}
         <div className="mb-12">
-          <h2 className="text-2xl font-serif font-bold text-stone-900 mb-2 flex items-center gap-2">
-            <span>❖</span> Behavioral Insights & Contradictions
+          <h2 className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+            <span>💡</span> Behavioral Insights & Contradictions
           </h2>
-          <p className="text-stone-700 font-serif mb-2">
+          <p className="text-neutral-400 mb-2">
             We&apos;ve analyzed your spending patterns against your stated goals and Money Style preferences. 
             Here&apos;s where your actions and intentions diverge:
           </p>
           
           {/* Insight Summary Stats */}
           <div className="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-gradient-to-br from-red-50 to-amber-50 rounded-lg border-2 border-red-800/30 p-4 shadow-md">
+            <div className="glass rounded-xl border border-red-500/30 p-4">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-2xl">🚨</span>
-                <p className="text-sm font-serif font-semibold text-stone-900">High Priority</p>
+                <p className="text-sm font-semibold text-white">High Priority</p>
               </div>
-              <p className="text-2xl font-serif font-bold text-red-900">
+              <p className="text-2xl font-bold text-red-400">
                 {contradictions.filter(c => c.severity === 'high').length}
               </p>
-              <p className="text-xs font-serif text-stone-700">Needs immediate attention</p>
+              <p className="text-xs text-neutral-400">Needs immediate attention</p>
             </div>
-            <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-lg border-2 border-amber-800/30 p-4 shadow-md">
+            <div className="glass rounded-xl border border-orange-500/30 p-4">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-2xl">📊</span>
-                <p className="text-sm font-serif font-semibold text-stone-900">Watch Closely</p>
+                <p className="text-sm font-semibold text-white">Watch Closely</p>
               </div>
-              <p className="text-2xl font-serif font-bold text-amber-900">
+              <p className="text-2xl font-bold text-orange-400">
                 {contradictions.filter(c => c.severity === 'medium').length}
               </p>
-              <p className="text-xs font-serif text-stone-700">Developing patterns</p>
+              <p className="text-xs text-neutral-400">Developing patterns</p>
             </div>
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border-2 border-green-800/30 p-4 shadow-md">
+            <div className="glass rounded-xl border border-emerald-500/30 p-4">
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-2xl">✨</span>
-                <p className="text-sm font-serif font-semibold text-stone-900">Positive Trends</p>
+                <p className="text-sm font-semibold text-white">Positive Trends</p>
               </div>
-              <p className="text-2xl font-serif font-bold text-green-900">
+              <p className="text-2xl font-bold text-emerald-400">
                 {contradictions.filter(c => c.severity === 'low').length}
               </p>
               <p className="text-xs font-serif text-stone-700">Good financial behaviors</p>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { motion } from 'framer-motion';
@@ -173,19 +173,17 @@ export default function GoalsPage() {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-100 via-amber-50 to-red-50">
+    <div className="min-h-screen bg-black">
       {/* Header */}
-      <header className="bg-gradient-to-r from-stone-50/95 to-amber-50/95 backdrop-blur-sm shadow-md border-b-2 border-amber-800/30">
+      <header className="glass border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex justify-between items-center">
-            <Link href="/" className="text-2xl font-serif font-bold">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-900 via-red-900 to-amber-800">
-                Fin<span className="text-transparent bg-clip-text bg-gradient-to-r from-red-800 via-orange-900 to-red-900">Coach</span>
-              </span>
+            <Link href="/" className="text-2xl font-bold gradient-text">
+              FinCoach
             </Link>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-stone-800 font-serif italic">Welcome back!</span>
-              <Link href="/profile" className="w-10 h-10 bg-gradient-to-br from-amber-800 to-red-900 rounded-full flex items-center justify-center text-stone-50 font-serif font-semibold border-2 border-amber-900/40 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+              <span className="text-sm text-neutral-400">Welcome back!</span>
+              <Link href="/profile" className="w-10 h-10 bg-emerald-500 hover:bg-emerald-600 rounded-full flex items-center justify-center text-white font-semibold transition-colors cursor-pointer">
                 U
               </Link>
             </div>
@@ -194,28 +192,28 @@ export default function GoalsPage() {
       </header>
       
       {/* Mode Selector */}
-      <div className="bg-gradient-to-r from-stone-50/80 to-amber-50/80 backdrop-blur-sm border-b-2 border-amber-800/30">
+      <div className="border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex gap-8">
             <button
               onClick={() => setActiveTab('goals')}
-              className={`py-4 px-1 border-b-2 font-serif font-medium text-sm transition-colors ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab === 'goals'
-                  ? 'border-amber-900 text-stone-900'
-                  : 'border-transparent text-stone-700/70 hover:text-stone-900 hover:border-amber-700'
+                  ? 'border-emerald-500 text-white'
+                  : 'border-transparent text-neutral-500 hover:text-neutral-300'
               }`}
             >
               🎯 Goals
             </button>
             <Link
               href="/behavior"
-              className="py-4 px-1 border-b-2 border-transparent text-stone-700/70 hover:text-stone-900 hover:border-amber-700 font-serif font-medium text-sm"
+              className="py-4 px-1 border-b-2 border-transparent text-neutral-500 hover:text-neutral-300 font-medium text-sm transition-colors"
             >
               📊 Behavior
             </Link>
             <Link
               href="/plan"
-              className="py-4 px-1 border-b-2 border-transparent text-stone-700/70 hover:text-stone-900 hover:border-amber-700 font-serif font-medium text-sm"
+              className="py-4 px-1 border-b-2 border-transparent text-neutral-500 hover:text-neutral-300 font-medium text-sm transition-colors"
             >
               📋 Plan
             </Link>
@@ -226,8 +224,8 @@ export default function GoalsPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-serif font-bold text-stone-900 mb-2">Your Financial Goals</h1>
-          <p className="text-stone-800/80 font-light">
+          <h1 className="text-3xl font-bold text-white mb-2">Your Financial Goals</h1>
+          <p className="text-neutral-400">
             What do you want your money to help you achieve? Think big picture.
           </p>
         </div>
@@ -238,15 +236,9 @@ export default function GoalsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="mb-8 bg-gradient-to-br from-stone-50 to-amber-50 rounded-lg border-4 border-double border-amber-800/40 p-6 shadow-xl relative overflow-hidden"
+            className="mb-8 glass rounded-2xl p-6 border border-white/10"
           >
-            {/* Corner Decorations */}
-            <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-amber-900/30" />
-            <div className="absolute top-0 right-0 w-8 h-8 border-r-2 border-t-2 border-amber-900/30" />
-            <div className="absolute bottom-0 left-0 w-8 h-8 border-l-2 border-b-2 border-amber-900/30" />
-            <div className="absolute bottom-0 right-0 w-8 h-8 border-r-2 border-b-2 border-amber-900/30" />
-            
-            <h2 className="text-2xl font-serif font-bold text-stone-900 mb-6 flex items-center gap-2">
+            <h2 className="text-2xl font-semibold text-white mb-6 flex items-center gap-2">
               <span>📊</span> Goals Progress Overview
             </h2>
             
@@ -277,7 +269,7 @@ export default function GoalsPage() {
                     borderRadius: '8px',
                     fontFamily: 'serif',
                   }}
-                  formatter={(value: number | string | undefined, name: string | undefined) => {
+                  formatter={(value: number | string | undefined) => {
                     if (value === undefined || value === null) return '';
                     const numValue = typeof value === 'string' ? parseFloat(value) : value;
                     return `$${!isNaN(numValue) ? numValue.toLocaleString() : String(value)}`;
@@ -290,21 +282,21 @@ export default function GoalsPage() {
             </ResponsiveContainer>
             
             <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg border-2 border-green-800/30 p-4 shadow-md">
-                <p className="text-sm font-serif text-stone-900 mb-1">Total Saved</p>
-                <p className="text-2xl font-serif font-bold text-green-900">
+              <div className="glass rounded-xl border border-emerald-500/30 p-4">
+                <p className="text-sm text-neutral-400 mb-1">Total Saved</p>
+                <p className="text-2xl font-bold text-emerald-500">
                   ${goals.reduce((sum, goal) => sum + goal.currentAmount, 0).toLocaleString()}
                 </p>
               </div>
-              <div className="bg-gradient-to-br from-amber-50 to-yellow-50 rounded-lg border-2 border-amber-800/30 p-4 shadow-md">
-                <p className="text-sm font-serif text-stone-900 mb-1">Total Target</p>
-                <p className="text-2xl font-serif font-bold text-amber-900">
+              <div className="glass rounded-xl border border-blue-500/30 p-4">
+                <p className="text-sm text-neutral-400 mb-1">Total Target</p>
+                <p className="text-2xl font-bold text-blue-500">
                   ${goals.reduce((sum, goal) => sum + goal.targetAmount, 0).toLocaleString()}
                 </p>
               </div>
-              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg border-2 border-blue-800/30 p-4 shadow-md">
-                <p className="text-sm font-serif text-stone-900 mb-1">Average Progress</p>
-                <p className="text-2xl font-serif font-bold text-blue-900">
+              <div className="glass rounded-xl border border-violet-500/30 p-4">
+                <p className="text-sm text-neutral-400 mb-1">Average Progress</p>
+                <p className="text-2xl font-bold text-violet-500">
                   {(goals.reduce((sum, goal) => sum + (goal.currentAmount / goal.targetAmount * 100), 0) / goals.length).toFixed(1)}%
                 </p>
               </div>
@@ -316,28 +308,24 @@ export default function GoalsPage() {
           {/* Goals List */}
           <div className="lg:col-span-2 space-y-6">
             {/* Active Goals */}
-            <div className="bg-gradient-to-br from-stone-50/95 to-amber-50/90 backdrop-blur-sm rounded-lg shadow-xl border-4 border-double border-amber-800/40 p-6 relative">
-              {/* Corner decorations */}
-              <div className="absolute top-0 left-0 w-10 h-10 border-l-2 border-t-2 border-amber-800/30 rounded-tl-lg" />
-              <div className="absolute top-0 right-0 w-10 h-10 border-r-2 border-t-2 border-amber-800/30 rounded-tr-lg" />
-              
-              <div className="flex justify-between items-center mb-4 relative z-10">
-                <h2 className="text-xl font-serif font-semibold text-stone-900">Active Goals</h2>
+            <div className="glass rounded-2xl p-6 border border-white/10">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-white">Active Goals</h2>
                 <button 
                   onClick={() => setShowNewGoalModal(true)}
-                  className="bg-gradient-to-r from-amber-900 to-red-900 text-stone-50 px-4 py-2 rounded-lg text-sm font-serif font-medium hover:from-amber-950 hover:to-red-950 shadow-md border-2 border-amber-950/40"
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
                 >
                   + Add Goal
                 </button>
               </div>
               
-              <div className="space-y-4 relative z-10">
+              <div className="space-y-4">
                 {goals.length === 0 ? (
                   <div className="text-center py-12">
-                    <p className="text-stone-700/70 font-serif italic mb-4">No goals yet. Create your first goal to get started!</p>
+                    <p className="text-neutral-400 mb-4">No goals yet. Create your first goal to get started!</p>
                     <button 
                       onClick={() => setShowNewGoalModal(true)}
-                      className="bg-gradient-to-r from-amber-900 to-red-900 text-stone-50 px-6 py-3 rounded-lg font-serif font-medium hover:from-amber-950 hover:to-red-950 shadow-md border-2 border-amber-950/40"
+                      className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-xl font-medium transition-colors"
                     >
                       + Create First Goal
                     </button>
@@ -351,46 +339,43 @@ export default function GoalsPage() {
                     return (
                       <div 
                         key={goal.id}
-                        className={`border-2 ${
+                        className={`border ${
                           isOnTrack 
-                            ? 'border-amber-700/40 bg-gradient-to-r from-amber-100/70 to-stone-100/60' 
-                            : 'border-red-800/40 bg-gradient-to-r from-red-100/60 to-amber-100/60'
-                        } rounded-lg p-4 hover:border-amber-800/70 transition-all hover:shadow-md relative`}
+                            ? 'border-emerald-500/30 bg-white/5' 
+                            : 'border-orange-500/30 bg-white/5'
+                        } rounded-xl p-4 hover:bg-white/10 transition-all`}
                       >
-                        <div className="absolute top-2 right-2 text-xs text-amber-800/30">❖</div>
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <h3 className={`font-serif font-semibold ${isOnTrack ? 'text-stone-900' : 'text-red-950'}`}>
+                            <h3 className="font-semibold text-white">
                               {goal.title}
                             </h3>
-                            <p className={`text-sm font-light ${isOnTrack ? 'text-stone-700/80' : 'text-red-900/80'}`}>
+                            <p className="text-sm text-neutral-400">
                               Target: ${goal.targetAmount.toLocaleString()} by {targetDate}
                             </p>
                           </div>
                           <span className={`${
                             isOnTrack 
-                              ? 'bg-gradient-to-r from-emerald-100 to-green-100 text-green-900 border-green-800/30' 
-                              : 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-900 border-amber-800/30'
-                          } text-xs px-3 py-1 rounded-full font-serif border-2`}>
+                              ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' 
+                              : 'bg-orange-500/20 text-orange-400 border-orange-500/30'
+                          } text-xs px-3 py-1 rounded-full border`}>
                             {isOnTrack ? 'On Track' : 'Needs Focus'}
                           </span>
                         </div>
                         
                         <div className="mt-3">
                           <div className="flex justify-between text-sm mb-1">
-                            <span className={`font-light ${isOnTrack ? 'text-stone-700/70' : 'text-red-900/70'}`}>Progress</span>
-                            <span className={`font-serif font-medium ${isOnTrack ? 'text-stone-900' : 'text-red-950'}`}>
+                            <span className="text-neutral-400">Progress</span>
+                            <span className="font-medium text-white">
                               ${goal.currentAmount.toLocaleString()} / ${goal.targetAmount.toLocaleString()}
                             </span>
                           </div>
-                          <div className={`w-full rounded-full h-2.5 border ${
-                            isOnTrack ? 'bg-stone-200/40 border-amber-800/30' : 'bg-red-200/30 border-red-800/30'
-                          }`}>
+                          <div className="w-full rounded-full h-2.5 bg-white/5 border border-white/10">
                             <div 
                               className={`h-2.5 rounded-full ${
                                 isOnTrack 
-                                  ? 'bg-gradient-to-r from-amber-700 to-amber-800' 
-                                  : 'bg-gradient-to-r from-red-700 to-red-800'
+                                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' 
+                                  : 'bg-gradient-to-r from-orange-500 to-orange-400'
                               }`}
                               style={{ width: `${Math.min(progressPercent, 100)}%` }}
                             ></div>
@@ -413,28 +398,28 @@ export default function GoalsPage() {
             </div>
             
             {/* Goal Insights */}
-            <div className="bg-gradient-to-br from-amber-50/90 to-orange-50/90 backdrop-blur-sm rounded-lg shadow-xl border border-amber-200/50 p-6">
-              <h2 className="text-xl font-serif font-semibold text-amber-900 mb-4">Insights</h2>
+            <div className="glass rounded-2xl p-6 border border-white/10">
+              <h2 className="text-xl font-semibold text-white mb-4">Insights</h2>
               <div className="space-y-3">
-                <div className="flex items-start gap-3 p-3 bg-gradient-to-r from-blue-50/80 to-cyan-50/70 rounded-lg border border-blue-200/30">
+                <div className="flex items-start gap-3 p-3 bg-blue-500/10 rounded-xl border border-blue-500/30">
                   <div className="text-2xl">💡</div>
                   <div>
-                    <p className="text-sm text-blue-900 font-serif font-medium">
+                    <p className="text-sm text-white font-medium">
                       Your emergency fund is 65% complete
                     </p>
-                    <p className="text-xs text-blue-800/70 mt-1 font-light">
+                    <p className="text-xs text-neutral-400 mt-1">
                       At your current pace, you&apos;ll reach your goal 2 months early!
                     </p>
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-3 p-3 bg-gradient-to-r from-amber-50/80 to-yellow-50/70 rounded-lg border border-amber-200/30">
+                <div className="flex items-start gap-3 p-3 bg-orange-500/10 rounded-xl border border-orange-500/30">
                   <div className="text-2xl">⚠️</div>
                   <div>
-                    <p className="text-sm text-amber-900 font-serif font-medium">
+                    <p className="text-sm text-white font-medium">
                       House down payment needs attention
                     </p>
-                    <p className="text-xs text-amber-800/70 mt-1 font-light">
+                    <p className="text-xs text-neutral-400 mt-1">
                       Consider increasing your monthly contribution to stay on track.
                     </p>
                   </div>
@@ -446,25 +431,24 @@ export default function GoalsPage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Your Money Style */}
-            <div className="bg-gradient-to-br from-amber-900 via-red-900 to-amber-950 rounded-lg shadow-xl border-4 border-double border-amber-950/50 p-6 text-stone-50 relative">
-              <div className="absolute top-2 right-2 text-amber-400/30 text-sm">◆</div>
-              <h3 className="text-lg font-serif font-semibold mb-2">Your Money Style</h3>
+            <div className="glass rounded-2xl border border-emerald-500/30 p-6 relative">
+              <h3 className="text-lg font-semibold text-white mb-2">Your Money Style</h3>
               {moneyStyle ? (
                 <>
-                  <p className="text-2xl font-serif font-bold mb-3 tracking-wide">{moneyStyle.type}</p>
-                  <p className="text-sm opacity-90 font-light leading-relaxed">
+                  <p className="text-2xl font-bold mb-3 text-emerald-500">{moneyStyle.type}</p>
+                  <p className="text-sm text-neutral-400 leading-relaxed">
                     {moneyStyle.moneyStyleDescription}
                   </p>
                 </>
               ) : (
                 <>
-                  <p className="text-2xl font-serif font-bold mb-3 tracking-wide">INTJ</p>
-                  <p className="text-sm opacity-90 font-light leading-relaxed">
+                  <p className="text-2xl font-bold mb-3 text-emerald-500">INTJ</p>
+                  <p className="text-sm text-neutral-400 leading-relaxed">
                     The Architect - You design comprehensive financial systems and trust data-driven planning.
                   </p>
                   <Link 
                     href="/onboarding/assessment"
-                    className="mt-3 inline-block text-xs text-amber-200 hover:text-amber-100 underline"
+                    className="mt-3 inline-block text-xs text-emerald-400 hover:text-emerald-300 underline"
                   >
                     Take Assessment →
                   </Link>
@@ -473,29 +457,26 @@ export default function GoalsPage() {
             </div>
             
             {/* Quick Actions */}
-            <div className="bg-gradient-to-br from-stone-50/95 to-amber-50/90 backdrop-blur-sm rounded-lg shadow-xl border-4 border-double border-amber-800/40 p-6 relative">
-              <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-amber-800/30 rounded-tl-lg" />
-              <div className="absolute top-0 right-0 w-8 h-8 border-r-2 border-t-2 border-amber-800/30 rounded-tr-lg" />
-              
-              <h3 className="font-serif font-semibold text-stone-900 mb-4 relative z-10">Quick Actions</h3>
-              <div className="space-y-2 relative z-10">
+            <div className="glass rounded-2xl p-6 border border-white/10">
+              <h3 className="font-semibold text-white mb-4">Quick Actions</h3>
+              <div className="space-y-2">
                 <button 
                   onClick={() => setShowNewGoalModal(true)}
-                  className="w-full text-left px-4 py-3 rounded-lg border-2 border-amber-700/40 hover:border-amber-800/70 hover:bg-gradient-to-r hover:from-amber-100/70 hover:to-stone-100/60 transition-all text-sm font-light text-stone-900"
+                  className="w-full text-left px-4 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all text-sm text-white"
                 >
                   📝 Set New Goal
                 </button>
                 <button 
                   onClick={() => setShowUpdateProgressModal(true)}
-                  className="w-full text-left px-4 py-3 rounded-lg border-2 border-amber-700/40 hover:border-amber-800/70 hover:bg-gradient-to-r hover:from-amber-100/70 hover:to-stone-100/60 transition-all text-sm font-light text-stone-900"
+                  className="w-full text-left px-4 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all text-sm text-white"
                 >
                   📊 Update Progress
                 </button>
                 <button 
                   onClick={() => setShowSyncModal(true)}
-                  className="w-full text-left px-4 py-3 rounded-lg border-2 border-amber-700/40 hover:border-amber-800/70 hover:bg-gradient-to-r hover:from-amber-100/70 hover:to-stone-100/60 transition-all text-sm font-light text-stone-900"
+                  className="w-full text-left px-4 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all text-sm text-white"
                 >
-                  🔄 Sync Bank Accounts
+                  🔗 Sync Bank Account
                 </button>
               </div>
             </div>
@@ -505,25 +486,19 @@ export default function GoalsPage() {
       
       {/* New Goal Modal */}
       {showNewGoalModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-gradient-to-br from-stone-50/98 to-amber-50/95 rounded-lg shadow-2xl border-4 border-double border-amber-800/40 p-8 max-w-md w-full relative">
-            {/* Corner decorations */}
-            <div className="absolute top-0 left-0 w-12 h-12 border-l-2 border-t-2 border-amber-800/30 rounded-tl-lg" />
-            <div className="absolute top-0 right-0 w-12 h-12 border-r-2 border-t-2 border-amber-800/30 rounded-tr-lg" />
-            <div className="absolute bottom-0 left-0 w-12 h-12 border-l-2 border-b-2 border-amber-800/30 rounded-bl-lg" />
-            <div className="absolute bottom-0 right-0 w-12 h-12 border-r-2 border-b-2 border-amber-800/30 rounded-br-lg" />
-            
-            <div className="relative z-10">
-              <h2 className="text-2xl font-serif font-bold text-stone-900 mb-6">Set New Financial Goal</h2>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="glass rounded-2xl border border-white/20 p-8 max-w-md w-full">
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-6">Set New Financial Goal</h2>
               
               <form onSubmit={handleNewGoalSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-serif text-stone-800 mb-2">Goal Title</label>
+                  <label className="block text-sm text-neutral-400 mb-2">Goal Title</label>
                   <input
                     type="text"
                     value={newGoal.title}
                     onChange={(e) => setNewGoal({ ...newGoal, title: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg border-2 border-amber-700/40 bg-stone-50 focus:border-amber-800 focus:outline-none font-light text-stone-900 placeholder:text-stone-400"
+                    className="w-full px-4 py-2 rounded-xl border border-white/10 bg-white/5 focus:border-emerald-500 focus:outline-none text-white placeholder:text-neutral-500"
                     placeholder="e.g., Emergency Fund"
                     required
                   />
@@ -531,36 +506,36 @@ export default function GoalsPage() {
                 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-serif text-stone-800 mb-2">Target Amount</label>
+                    <label className="block text-sm text-neutral-400 mb-2">Target Amount</label>
                     <input
                       type="number"
                       value={newGoal.targetAmount}
                       onChange={(e) => setNewGoal({ ...newGoal, targetAmount: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border-2 border-amber-700/40 bg-stone-50 focus:border-amber-800 focus:outline-none font-light text-stone-900 placeholder:text-stone-400"
+                      className="w-full px-4 py-2 rounded-xl border border-white/10 bg-white/5 focus:border-emerald-500 focus:outline-none text-white placeholder:text-neutral-500"
                       placeholder="$10,000"
                       required
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-serif text-stone-800 mb-2">Target Date</label>
+                    <label className="block text-sm text-neutral-400 mb-2">Target Date</label>
                     <input
                       type="date"
                       value={newGoal.targetDate}
                       onChange={(e) => setNewGoal({ ...newGoal, targetDate: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border-2 border-amber-700/40 bg-stone-50 focus:border-amber-800 focus:outline-none font-light text-stone-900 placeholder:text-stone-400"
+                      className="w-full px-4 py-2 rounded-xl border border-white/10 bg-white/5 focus:border-emerald-500 focus:outline-none text-white placeholder:text-neutral-500"
                       required
                     />
                   </div>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-serif text-stone-800 mb-2">Current Amount (Optional)</label>
+                  <label className="block text-sm text-neutral-400 mb-2">Current Amount (Optional)</label>
                   <input
                     type="number"
                     value={newGoal.currentAmount}
                     onChange={(e) => setNewGoal({ ...newGoal, currentAmount: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg border-2 border-amber-700/40 bg-stone-50 focus:border-amber-800 focus:outline-none font-light text-stone-900 placeholder:text-stone-400"
+                    className="w-full px-4 py-2 rounded-xl border border-white/10 bg-white/5 focus:border-emerald-500 focus:outline-none text-white placeholder:text-neutral-500"
                     placeholder="$0"
                   />
                 </div>
@@ -569,13 +544,13 @@ export default function GoalsPage() {
                   <button
                     type="button"
                     onClick={() => setShowNewGoalModal(false)}
-                    className="flex-1 px-4 py-3 rounded-lg border-2 border-stone-400 text-stone-700 font-serif hover:bg-stone-100 transition-all"
+                    className="flex-1 px-4 py-3 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-all"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-amber-900 to-red-900 text-stone-50 font-serif font-semibold hover:from-amber-950 hover:to-red-950 transition-all border-2 border-amber-950/40"
+                    className="flex-1 px-4 py-3 rounded-xl bg-emerald-500 text-white font-semibold hover:bg-emerald-600 transition-all"
                   >
                     Create Goal
                   </button>
@@ -588,38 +563,32 @@ export default function GoalsPage() {
       
       {/* Update Progress Modal */}
       {showUpdateProgressModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-gradient-to-br from-stone-50/98 to-amber-50/95 rounded-lg shadow-2xl border-4 border-double border-amber-800/40 p-8 max-w-md w-full relative">
-            {/* Corner decorations */}
-            <div className="absolute top-0 left-0 w-12 h-12 border-l-2 border-t-2 border-amber-800/30 rounded-tl-lg" />
-            <div className="absolute top-0 right-0 w-12 h-12 border-r-2 border-t-2 border-amber-800/30 rounded-tr-lg" />
-            <div className="absolute bottom-0 left-0 w-12 h-12 border-l-2 border-b-2 border-amber-800/30 rounded-bl-lg" />
-            <div className="absolute bottom-0 right-0 w-12 h-12 border-r-2 border-b-2 border-amber-800/30 rounded-br-lg" />
-            
-            <div className="relative z-10">
-              <h2 className="text-2xl font-serif font-bold text-stone-900 mb-6">Update Goal Progress</h2>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="glass rounded-2xl border border-white/20 p-8 max-w-md w-full">
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-6">Update Goal Progress</h2>
               
               <form onSubmit={handleUpdateProgressSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-serif text-stone-800 mb-2">Select Goal</label>
+                  <label className="block text-sm text-neutral-400 mb-2">Select Goal</label>
                   <select
                     value={updateProgress.goalId}
                     onChange={(e) => setUpdateProgress({ ...updateProgress, goalId: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg border-2 border-amber-700/40 bg-stone-50 focus:border-amber-800 focus:outline-none font-light text-stone-900"
+                    className="w-full px-4 py-2 rounded-xl border border-white/10 bg-white/5 focus:border-emerald-500 focus:outline-none text-white"
                   >
                     {goals.map(goal => (
-                      <option key={goal.id} value={goal.id}>{goal.title}</option>
+                      <option key={goal.id} value={goal.id} className="bg-neutral-900">{goal.title}</option>
                     ))}
                   </select>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-serif text-stone-800 mb-2">New Amount</label>
+                  <label className="block text-sm text-neutral-400 mb-2">New Amount</label>
                   <input
                     type="number"
                     value={updateProgress.newAmount}
                     onChange={(e) => setUpdateProgress({ ...updateProgress, newAmount: e.target.value })}
-                    className="w-full px-4 py-2 rounded-lg border-2 border-amber-700/40 bg-stone-50 focus:border-amber-800 focus:outline-none font-light text-stone-900 placeholder:text-stone-400"
+                    className="w-full px-4 py-2 rounded-xl border border-white/10 bg-white/5 focus:border-emerald-500 focus:outline-none text-white placeholder:text-neutral-500"
                     placeholder="Enter current amount"
                     required
                   />
@@ -630,13 +599,13 @@ export default function GoalsPage() {
                   if (!selectedGoal) return null;
                   
                   return (
-                    <div className="bg-amber-100/50 border-2 border-amber-700/30 rounded-lg p-4">
-                      <p className="text-sm text-stone-800 font-light">
-                        <span className="font-serif font-semibold">Current: </span>
+                    <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4">
+                      <p className="text-sm text-white">
+                        <span className="font-semibold">Current: </span>
                         ${selectedGoal.currentAmount.toLocaleString()}
                       </p>
-                      <p className="text-sm text-stone-800 font-light mt-1">
-                        <span className="font-serif font-semibold">Target: </span>
+                      <p className="text-sm text-white mt-1">
+                        <span className="font-semibold">Target: </span>
                         ${selectedGoal.targetAmount.toLocaleString()}
                       </p>
                     </div>
@@ -647,13 +616,13 @@ export default function GoalsPage() {
                   <button
                     type="button"
                     onClick={() => setShowUpdateProgressModal(false)}
-                    className="flex-1 px-4 py-3 rounded-lg border-2 border-stone-400 text-stone-700 font-serif hover:bg-stone-100 transition-all"
+                    className="flex-1 px-4 py-3 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-all"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 px-4 py-3 rounded-lg bg-gradient-to-r from-amber-900 to-red-900 text-stone-50 font-serif font-semibold hover:from-amber-950 hover:to-red-950 transition-all border-2 border-amber-950/40"
+                    className="flex-1 px-4 py-3 rounded-xl bg-emerald-500 text-white font-semibold hover:bg-emerald-600 transition-all"
                   >
                     Update
                   </button>
@@ -666,47 +635,48 @@ export default function GoalsPage() {
       
       {/* Sync Accounts Modal */}
       {showSyncModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-gradient-to-br from-stone-50/98 to-amber-50/95 rounded-lg shadow-2xl border-4 border-double border-amber-800/40 p-8 max-w-md w-full relative">
-            {/* Corner decorations */}
-            <div className="absolute top-0 left-0 w-12 h-12 border-l-2 border-t-2 border-amber-800/30 rounded-tl-lg" />
-            <div className="absolute top-0 right-0 w-12 h-12 border-r-2 border-t-2 border-amber-800/30 rounded-tr-lg" />
-            <div className="absolute bottom-0 left-0 w-12 h-12 border-l-2 border-b-2 border-amber-800/30 rounded-bl-lg" />
-            <div className="absolute bottom-0 right-0 w-12 h-12 border-r-2 border-b-2 border-amber-800/30 rounded-br-lg" />
-            
-            <div className="relative z-10">
-              <h2 className="text-2xl font-serif font-bold text-stone-900 mb-4">Sync Bank Accounts</h2>
-              <p className="text-stone-700 font-light mb-6 leading-relaxed">
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="glass rounded-2xl border border-white/20 p-8 max-w-md w-full">
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-4">Sync Bank Accounts</h2>
+              <p className="text-neutral-400 mb-6 leading-relaxed">
                 Connect your financial institutions to automatically track your progress and spending patterns.
               </p>
               
               <div className="space-y-3 mb-6">
-                <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-amber-100/70 to-stone-100/60 rounded-lg border-2 border-amber-700/30">
+                <div className="flex items-center gap-3 p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/30">
                   <div className="text-2xl">🏦</div>
                   <div>
-                    <p className="font-serif font-semibold text-stone-900 text-sm">Secure Connection</p>
-                    <p className="text-xs text-stone-700 font-light">Bank-level encryption</p>
+                    <p className="font-semibold text-white text-sm">Secure Connection</p>
+                    <p className="text-xs text-neutral-400">Bank-level encryption</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-amber-100/70 to-stone-100/60 rounded-lg border-2 border-amber-700/30">
+                <div className="flex items-center gap-3 p-3 bg-blue-500/10 rounded-xl border border-blue-500/30">
                   <div className="text-2xl">🔄</div>
                   <div>
-                    <p className="font-serif font-semibold text-stone-900 text-sm">Auto-Update</p>
-                    <p className="text-xs text-stone-700 font-light">Daily transaction sync</p>
+                    <p className="font-semibold text-white text-sm">Auto-Update</p>
+                    <p className="text-xs text-neutral-400">Daily transaction sync</p>
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-amber-100/70 to-stone-100/60 rounded-lg border-2 border-amber-700/30">
+                <div className="flex items-center gap-3 p-3 bg-violet-500/10 rounded-xl border border-violet-500/30">
                   <div className="text-2xl">📊</div>
                   <div>
-                    <p className="font-serif font-semibold text-stone-900 text-sm">Smart Insights</p>
-                    <p className="text-xs text-stone-700 font-light">Personalized analysis</p>
+                    <p className="font-semibold text-white text-sm">Smart Insights</p>
+                    <p className="text-xs text-neutral-400">Personalized analysis</p>
                   </div>
                 </div>
               </div>
               
               <PlaidLinkButton userId={userId || 'demo-user-123'} />
+              
+              <button
+                onClick={() => setShowSyncModal(false)}
+                className="mt-4 w-full px-4 py-3 rounded-xl border border-white/10 text-white hover:bg-white/5 transition-all"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>
