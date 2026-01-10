@@ -106,13 +106,21 @@ export default function AssessmentPage() {
     if (saved) {
       try {
         const { currentQuestion: savedQuestion, answers: savedAnswers } = JSON.parse(saved);
-        if (savedQuestion > 0) {
+        // Validate saved state before restoring
+        if (savedQuestion > 0 && 
+            savedQuestion < assessmentQuestions.length &&
+            Array.isArray(savedAnswers) &&
+            savedAnswers.length <= assessmentQuestions.length) {
           setCurrentQuestion(savedQuestion);
           setAnswers(savedAnswers);
           setToast({ message: 'Welcome back! Your progress has been restored.', type: 'success' });
+        } else {
+          // Invalid saved state, clear it
+          localStorage.removeItem(STORAGE_KEY);
         }
       } catch (e) {
         console.error('Failed to restore progress:', e);
+        localStorage.removeItem(STORAGE_KEY);
       }
     }
   }, []);
@@ -124,8 +132,10 @@ export default function AssessmentPage() {
     }
   }, [currentQuestion, answers]);
 
-  const question = assessmentQuestions[currentQuestion];
-  const progress = ((currentQuestion + 1) / assessmentQuestions.length) * 100;
+  // Safety check: Ensure currentQuestion is within bounds
+  const safeCurrentQuestion = Math.min(currentQuestion, assessmentQuestions.length - 1);
+  const question = assessmentQuestions[safeCurrentQuestion];
+  const progress = ((safeCurrentQuestion + 1) / assessmentQuestions.length) * 100;
 
   // Reset focus to first option when question changes
   useEffect(() => {
@@ -187,6 +197,11 @@ export default function AssessmentPage() {
   }, [focusedOptionIndex, currentQuestion, question.options.length]); // eslint-disable-line react-hooks/exhaustive-deps
   
   const handleAnswer = async (optionIndex: number) => {
+    // Prevent multiple submissions or answers beyond the last question
+    if (isSubmitting || answers.length >= assessmentQuestions.length) {
+      return;
+    }
+    
     const selectedOption = question.options[optionIndex];
     const newAnswer = {
       questionId: question.id,
@@ -201,7 +216,7 @@ export default function AssessmentPage() {
     if (currentQuestion < assessmentQuestions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      // Submit assessment
+      // Submit assessment - this is the final (20th) question
       await submitAssessment(updatedAnswers);
     }
   };
@@ -451,19 +466,19 @@ export default function AssessmentPage() {
         <div className="mb-8" role="region" aria-label="Assessment progress">
           <div className="flex justify-between items-center mb-3">
             <span className="text-sm text-neutral-400" aria-current="step">
-              Question {currentQuestion + 1} of {assessmentQuestions.length}
+              Question {safeCurrentQuestion + 1} of {assessmentQuestions.length}
             </span>
             <span className="text-sm text-neutral-500" aria-live="polite">
-              ~{Math.ceil((assessmentQuestions.length - currentQuestion - 1) * 9)}s remaining
+              ~{Math.ceil((assessmentQuestions.length - safeCurrentQuestion - 1) * 9)}s remaining
             </span>
           </div>
           <div 
             className="w-full bg-neutral-900 rounded-full h-1 overflow-hidden"
             role="progressbar"
-            aria-valuenow={currentQuestion + 1}
+            aria-valuenow={safeCurrentQuestion + 1}
             aria-valuemin={1}
             aria-valuemax={assessmentQuestions.length}
-            aria-label={`Assessment progress: question ${currentQuestion + 1} of ${assessmentQuestions.length}`}
+            aria-label={`Assessment progress: question ${safeCurrentQuestion + 1} of ${assessmentQuestions.length}`}
           >
             <div
               className="bg-gradient-to-r from-emerald-500 to-blue-500 h-1 transition-all duration-300"
