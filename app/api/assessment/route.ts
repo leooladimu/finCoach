@@ -80,9 +80,9 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      if (typeof answer.score !== 'number' || answer.score < 0 || answer.score > 3) {
+      if (typeof answer.score !== 'number' || answer.score < -2 || answer.score > 2) {
         return NextResponse.json(
-          { error: `Invalid answer ${i}: score must be a number between 0 and 3` },
+          { error: `Invalid answer ${i}: score must be a number between -2 and 2` },
           { status: 400 }
         );
       }

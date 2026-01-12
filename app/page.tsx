@@ -1,6 +1,29 @@
 import Link from 'next/link';
+import { auth } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
+import { getUserProfile } from '@/lib/kv';
 
-export default function Home() {
+export default async function Home() {
+  const { userId } = await auth();
+  
+  // If already signed in, check their profile status
+  if (userId) {
+    try {
+      const profile = await getUserProfile(userId);
+      
+      // If they have a money style, they've completed assessment - go to goals
+      if (profile?.moneyStyle) {
+        redirect('/goals');
+      } else {
+        // No money style yet - send to onboarding
+        redirect('/onboarding');
+      }
+    } catch {
+      // If error getting profile, send to onboarding to start fresh
+      redirect('/onboarding');
+    }
+  }
+  
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <div className="max-w-6xl w-full">
@@ -47,7 +70,7 @@ export default function Home() {
         {/* CTA Section */}
         <div className="text-center">
           <Link
-            href="/onboarding"
+            href="/sign-up"
             className="inline-block bg-emerald-500 hover:bg-emerald-600 text-white px-12 py-4 rounded-xl text-lg font-semibold transition-all shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 mb-4"
           >
             Get Started — Free 3-Minute Setup
@@ -58,10 +81,10 @@ export default function Home() {
           </p>
           
           <Link 
-            href="/goals"
+            href="/sign-in"
             className="text-sm text-neutral-400 hover:text-emerald-500 transition-colors inline-flex items-center gap-2"
           >
-            Already have an account? Go to Dashboard
+            Already using FinCoach? Sign In
             <span>→</span>
           </Link>
         </div>

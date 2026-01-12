@@ -43,22 +43,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Only use ClerkProvider if we have real Clerk keys
-  const hasRealClerkKeys = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && 
-                           !process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.includes('placeholder');
-  
-  const content = (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children}
-  {/* PlaidScript removed to prevent double loading of Plaid Link script */}
-      </body>
-    </html>
+  return (
+    <ClerkProvider>
+      <html lang="en">
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          {children}
+          {/* PlaidScript removed to prevent double loading of Plaid Link script */}
+        </body>
+      </html>
+    </ClerkProvider>
   );
-
-  if (hasRealClerkKeys) {
-    return <ClerkProvider>{content}</ClerkProvider>;
-  }
-  
-  return content;
 }

@@ -199,6 +199,7 @@ export default function AssessmentPage() {
   const handleAnswer = async (optionIndex: number) => {
     // Prevent multiple submissions or answers beyond the last question
     if (isSubmitting || answers.length >= assessmentQuestions.length) {
+      console.log('handleAnswer blocked:', { isSubmitting, answersLength: answers.length, questionsLength: assessmentQuestions.length });
       return;
     }
     
@@ -212,11 +213,19 @@ export default function AssessmentPage() {
     const updatedAnswers = [...answers, newAnswer];
     setAnswers(updatedAnswers);
     
+    // Save progress to localStorage
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      currentQuestion: currentQuestion + 1,
+      answers: updatedAnswers,
+    }));
+    
     // Move to next question or submit
     if (currentQuestion < assessmentQuestions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
+      setFocusedOptionIndex(0); // Reset focus for next question
     } else {
       // Submit assessment - this is the final (20th) question
+      console.log('Submitting assessment with', updatedAnswers.length, 'answers');
       await submitAssessment(updatedAnswers);
     }
   };
@@ -243,11 +252,12 @@ export default function AssessmentPage() {
         typeof answer.questionId !== 'number' ||
         typeof answer.dimension !== 'string' ||
         typeof answer.score !== 'number' ||
-        answer.score < 0 || 
-        answer.score > 3
+        answer.score < -2 || 
+        answer.score > 2
       );
 
       if (invalidAnswers.length > 0) {
+        console.error('Invalid answers:', invalidAnswers);
         throw new Error('Invalid answer format detected. Please refresh and try again.');
       }
 
@@ -328,6 +338,11 @@ export default function AssessmentPage() {
       localStorage.removeItem(STORAGE_KEY);
       setResult(assessmentResult);
       setIsSubmitting(false); // Important: Reset submitting state to show results
+      
+      // Auto-redirect to goals after 2 seconds to show results briefly
+      setTimeout(() => {
+        router.push('/goals');
+      }, 2000);
     } catch (error) {
       console.error('Error submitting assessment:', error);
       const errorMessage = error instanceof Error 
@@ -577,6 +592,23 @@ export default function AssessmentPage() {
             {currentQuestion > 0 && ' Press Backspace to go back.'}
           </span>
         </p>
+        
+        {/* Debug info and reset button */}
+        <div className="mt-8 text-center">
+          <p className="text-xs text-neutral-600 mb-2">
+            Debug: {answers.length} answers | Question {currentQuestion} | {isSubmitting ? 'Submitting...' : 'Ready'}
+          </p>
+          <button
+            onClick={() => {
+              localStorage.removeItem(STORAGE_KEY);
+              localStorage.removeItem(RATE_LIMIT_KEY);
+              window.location.reload();
+            }}
+            className="text-xs text-neutral-500 hover:text-neutral-300 underline"
+          >
+            Reset Assessment
+          </button>
+        </div>
       </div>
     </div>
   );

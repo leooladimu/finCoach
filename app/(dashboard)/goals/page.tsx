@@ -61,36 +61,39 @@ export default function GoalsPage() {
           category: g.category,
         })));
       } else {
-        // Initialize with default goals for demo
-        const defaultGoals = [
-          {
-            id: 'emergency-fund',
-            title: 'Build Emergency Fund',
-            targetAmount: 10000,
-            currentAmount: 6500,
-            targetDate: '2025-06-30',
-            category: 'Savings',
-          },
-          {
-            id: 'house-down-payment',
-            title: 'House Down Payment',
-            targetAmount: 60000,
-            currentAmount: 12000,
-            targetDate: '2026-12-31',
-            category: 'Home',
-          },
-        ];
-        setGoals(defaultGoals);
-        
-        // Save to KV
-        for (const goal of defaultGoals) {
-          const kvGoal: FinancialGoal = {
-            ...goal,
-            userId,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          };
-          await saveGoal(kvGoal);
+        // Only create default goals if user has completed assessment
+        // Otherwise, leave empty to encourage completing onboarding
+        if (profile?.moneyStyle) {
+          const defaultGoals = [
+            {
+              id: 'emergency-fund',
+              title: 'Build Emergency Fund',
+              targetAmount: 10000,
+              currentAmount: 6500,
+              targetDate: '2025-06-30',
+              category: 'Savings',
+            },
+            {
+              id: 'house-down-payment',
+              title: 'House Down Payment',
+              targetAmount: 60000,
+              currentAmount: 12000,
+              targetDate: '2026-12-31',
+              category: 'Home',
+            },
+          ];
+          setGoals(defaultGoals);
+          
+          // Save to KV
+          for (const goal of defaultGoals) {
+            const kvGoal: FinancialGoal = {
+              ...goal,
+              userId,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+            await saveGoal(kvGoal);
+          }
         }
       }
     }
@@ -328,13 +331,36 @@ export default function GoalsPage() {
               <div className="space-y-4">
                 {goals.length === 0 ? (
                   <div className="text-center py-12">
-                    <p className="text-neutral-400 mb-4">No goals yet. Create your first goal to get started!</p>
-                    <button 
-                      onClick={() => setShowNewGoalModal(true)}
-                      className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-xl font-medium transition-colors"
-                    >
-                      + Create First Goal
-                    </button>
+                    {!moneyStyle ? (
+                      <>
+                        <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto mb-4">
+                          <svg className="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                          </svg>
+                        </div>
+                        <p className="text-white font-medium mb-2">Complete Your Assessment First</p>
+                        <p className="text-neutral-400 mb-6 max-w-md mx-auto">
+                          Take our 3-minute Money Style assessment to unlock personalized goal recommendations and coaching.
+                        </p>
+                        <Link
+                          href="/onboarding/assessment"
+                          className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-xl font-medium transition-all"
+                        >
+                          Take Assessment Now
+                          <span>→</span>
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-neutral-400 mb-4">No goals yet. Create your first goal to get started!</p>
+                        <button 
+                          onClick={() => setShowNewGoalModal(true)}
+                          className="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-xl font-medium transition-colors"
+                        >
+                          + Create First Goal
+                        </button>
+                      </>
+                    )}
                   </div>
                 ) : (
                   goals.map((goal) => {
@@ -447,18 +473,26 @@ export default function GoalsPage() {
                   </p>
                 </>
               ) : (
-                <>
-                  <p className="text-2xl font-bold mb-3 text-emerald-500">INTJ</p>
-                  <p className="text-sm text-neutral-400 leading-relaxed">
-                    The Architect - You design comprehensive financial systems and trust data-driven planning.
+                <div className="py-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <p className="text-neutral-300 font-medium">Assessment Not Complete</p>
+                  </div>
+                  <p className="text-sm text-neutral-400 leading-relaxed mb-4">
+                    Discover your personalized Money Style to unlock tailored financial coaching that speaks your language.
                   </p>
                   <Link 
                     href="/onboarding/assessment"
-                    className="mt-3 inline-block text-xs text-emerald-400 hover:text-emerald-300 underline"
+                    className="inline-flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all"
                   >
-                    Take Assessment →
+                    Take 3-Min Assessment
+                    <span>→</span>
                   </Link>
-                </>
+                </div>
               )}
             </div>
             
