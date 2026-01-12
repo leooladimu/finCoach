@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useUser } from '@/lib/hooks/useUser';
 import { saveUserProfile } from '@/lib/kv';
+import { useClerk } from '@clerk/nextjs';
 
 export default function OnboardingWelcome() {
   const router = useRouter();
   const { userId } = useUser();
+  const { signOut } = useClerk();
   const [step, setStep] = useState(1);
   const [profile, setProfile] = useState({
     name: '',
@@ -48,9 +50,17 @@ export default function OnboardingWelcome() {
       <div className="max-w-2xl w-full">
         {/* Header */}
         <div className="text-center mb-12">
-          <Link href="/" className="inline-flex items-center gap-3 group mb-8">
-            <span className="text-3xl font-bold gradient-text">FinCoach</span>
-          </Link>
+          <div className="flex items-center justify-between mb-8">
+            <Link href="/" className="inline-flex items-center gap-3 group">
+              <span className="text-3xl font-bold gradient-text">FinCoach</span>
+            </Link>
+            <button
+              onClick={() => signOut(() => router.push('/'))}
+              className="text-sm text-neutral-400 hover:text-emerald-500 transition-colors"
+            >
+              Not you? Sign out
+            </button>
+          </div>
           <h1 className="text-4xl font-bold text-white mb-3">
             Welcome to Your Financial Journey
           </h1>
