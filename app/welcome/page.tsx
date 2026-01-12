@@ -1,27 +1,6 @@
 import Link from 'next/link';
-import { auth } from '@clerk/nextjs/server';
-import { redirect } from 'next/navigation';
-import { getUserProfile } from '@/lib/kv';
 
-export default async function Home() {
-  const { userId } = await auth();
-  
-  // Only redirect if user is signed in AND has completed assessment
-  if (userId) {
-    try {
-      const profile = await getUserProfile(userId);
-      
-      // If they have a money style, they've completed assessment - go to goals
-      if (profile?.moneyStyle) {
-        redirect('/goals');
-      }
-      // If signed in but no assessment, let them see landing page
-      // They can choose to continue onboarding or explore
-    } catch {
-      // If error getting profile, just show landing page
-    }
-  }
-  
+export default function WelcomePage() {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <div className="max-w-6xl w-full">
