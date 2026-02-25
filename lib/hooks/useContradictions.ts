@@ -34,14 +34,14 @@ export function useContradictions(timeRange: 'week' | 'month' | 'year' = 'month'
 
         // Load user profile from KV
         const profile = await getUserProfile(userId);
-        
+
         if (!profile) {
           // No profile data yet, show empty state
           setContradictions([]);
           setLoading(false);
           return;
         }
-        
+
         // Add stated preferences if not already set (for demo purposes)
         if (!profile.statedPreferences) {
           profile.statedPreferences = {
@@ -56,7 +56,7 @@ export function useContradictions(timeRange: 'week' | 'month' | 'year' = 'month'
         await initializeMockData(userId);
 
         // Run contradiction detection
-        const detected = await detectContradictions(userId, profile);        setContradictions(detected);
+        const detected = await detectContradictions(userId, profile); setContradictions(detected);
       } catch (err) {
         console.error('Error detecting contradictions:', err);
         setError('Failed to analyze spending patterns');

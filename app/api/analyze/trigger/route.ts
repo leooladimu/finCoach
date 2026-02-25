@@ -42,9 +42,9 @@ export async function POST(req: NextRequest) {
     // ============================================================================
     // PHASE 1: Mock Response (Current - for development without AWS)
     // ============================================================================
-    
+
     console.log(`[Lambda Mock] Analyzing contradictions for user: ${userId}, range: ${timeRange}`);
-    
+
     // Return mock data for now
     const mockResponse = {
       success: true,
@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
     // ============================================================================
     // PHASE 2: Real AWS Lambda Integration (Uncomment when ready)
     // ============================================================================
-    
+
     /*
     // Fetch user data from localStorage/Vercel KV
     // For now, we'll use mock data. In production, fetch from Vercel KV:
@@ -201,10 +201,10 @@ export async function POST(req: NextRequest) {
 
   } catch (error) {
     console.error('[Lambda] Error triggering analysis:', error);
-    
+
     return NextResponse.json(
-      { 
-        success: false, 
+      {
+        success: false,
         error: error instanceof Error ? error.message : 'Failed to trigger analysis'
       },
       { status: 500 }

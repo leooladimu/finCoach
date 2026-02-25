@@ -19,14 +19,14 @@ export interface UserProfile {
   email: string;
   name: string;
   createdAt: string;
-  
+
   // Money Style (disguised MBTI)
   moneyStyle?: {
     type: MBTIType;
     scores: MBTIScores;
     assessmentDate: string;
   };
-  
+
   // Life context
   lifeContext?: {
     age?: number;
@@ -35,7 +35,7 @@ export interface UserProfile {
     employmentStatus?: string;
     location?: string;
   };
-  
+
   // Stated preferences
   statedPreferences?: {
     riskTolerance?: 'conservative' | 'moderate' | 'aggressive';
@@ -93,19 +93,19 @@ export interface Contradiction {
   title?: string; // Human-readable title
   description?: string; // Detailed description
   emoji?: string; // Visual indicator
-  
+
   stated: {
     description: string;
     source: string; // 'assessment' | 'goal_setting' | 'plan' | 'financial_best_practices'
     value: string | number | boolean;
   };
-  
+
   actual: {
     description: string;
     evidence: string[]; // References to transactions, actions, etc.
     value: string | number | boolean;
   };
-  
+
   hypothesis?: string;
   experiment?: string;
   suggestion?: string; // Actionable recommendation

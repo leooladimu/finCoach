@@ -6,14 +6,14 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { publicToken, userId } = body;
-    
+
     if (!publicToken || !userId) {
       return NextResponse.json(
         { error: 'Public token and user ID are required' },
         { status: 400 }
       );
     }
-    
+
     // Check if Plaid credentials are configured
     if (!process.env.PLAID_CLIENT_ID || !process.env.PLAID_SECRET) {
       // Return mock data for development
@@ -48,16 +48,16 @@ export async function POST(request: NextRequest) {
         },
       });
     }
-    
+
     // Exchange public token for access token
     const { accessToken } = await exchangePublicToken(publicToken);
-    
+
     // Get account balances
     const accounts = await getBalances(accessToken);
-    
+
     // Get institution info
     const institution = await getInstitution(accessToken);
-    
+
     // TODO: Save to Vercel KV
     // await saveFinancialSnapshot(userId, {
     //   timestamp: new Date().toISOString(),
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     //   plaidAccessToken: accessToken,
     //   plaidItemId: itemId,
     // });
-    
+
     return NextResponse.json({
       success: true,
       message: 'Bank account connected successfully',

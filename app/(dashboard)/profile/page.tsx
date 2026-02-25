@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import type { AssessmentResult } from '@/types';
-import { useUser } from '@/lib/hooks/useUser';
-import { getUserProfile, updateUserProfile } from '@/lib/kv';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import type { AssessmentResult } from "@/types";
+import { useUser } from "@/lib/hooks/useUser";
+import { getUserProfile, updateUserProfile } from "@/lib/kv";
 
 export default function ProfilePage() {
   const { userId, isLoaded } = useUser();
   const [profile, setProfile] = useState({
-    name: '',
-    email: '',
-    age: '',
-    occupation: '',
-    primaryGoal: '',
+    name: "",
+    email: "",
+    age: "",
+    occupation: "",
+    primaryGoal: "",
   });
-  
+
   const [moneyStyle, setMoneyStyle] = useState<AssessmentResult | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState(profile);
@@ -24,36 +24,36 @@ export default function ProfilePage() {
   useEffect(() => {
     async function loadData() {
       if (!isLoaded || !userId) return;
-      
+
       const kvProfile = await getUserProfile(userId);
       if (kvProfile) {
         const profileData = {
           name: kvProfile.name,
           email: kvProfile.email,
-          age: kvProfile.lifeContext?.age?.toString() || '',
-          occupation: kvProfile.lifeContext?.employmentStatus || '',
-          primaryGoal: kvProfile.statedPreferences?.priorityGoals?.[0] || '',
+          age: kvProfile.lifeContext?.age?.toString() || "",
+          occupation: kvProfile.lifeContext?.employmentStatus || "",
+          primaryGoal: kvProfile.statedPreferences?.priorityGoals?.[0] || "",
         };
         setProfile(profileData);
         setEditedProfile(profileData);
-        
+
         if (kvProfile.moneyStyle) {
           setMoneyStyle({
             type: kvProfile.moneyStyle.type,
             scores: kvProfile.moneyStyle.scores,
-            moneyStyleDescription: '',
-            coachingApproach: '',
+            moneyStyleDescription: "",
+            coachingApproach: "",
           });
         }
       }
     }
-    
+
     loadData();
   }, [userId, isLoaded]);
 
   const handleSave = async () => {
     setProfile(editedProfile);
-    
+
     // Save to KV
     if (userId) {
       await updateUserProfile(userId, {
@@ -68,7 +68,7 @@ export default function ProfilePage() {
         },
       });
     }
-    
+
     setIsEditing(false);
   };
 
@@ -78,14 +78,14 @@ export default function ProfilePage() {
   };
 
   const goalLabels: Record<string, { emoji: string; title: string }> = {
-    house: { emoji: '🏠', title: 'Buy a house' },
-    debt: { emoji: '💳', title: 'Pay off debt' },
-    emergency: { emoji: '🚨', title: 'Build emergency fund' },
-    retirement: { emoji: '🏖️', title: 'Retirement savings' },
-    investment: { emoji: '📈', title: 'Start investing' },
-    education: { emoji: '🎓', title: 'Education fund' },
-    business: { emoji: '💼', title: 'Start a business' },
-    other: { emoji: '✨', title: 'Custom goal' },
+    house: { emoji: "🏠", title: "Buy a house" },
+    debt: { emoji: "💳", title: "Pay off debt" },
+    emergency: { emoji: "🚨", title: "Build emergency fund" },
+    retirement: { emoji: "🏖️", title: "Retirement savings" },
+    investment: { emoji: "📈", title: "Start investing" },
+    education: { emoji: "🎓", title: "Education fund" },
+    business: { emoji: "💼", title: "Start a business" },
+    other: { emoji: "✨", title: "Custom goal" },
   };
 
   return (
@@ -101,11 +101,14 @@ export default function ProfilePage() {
               </span>
             </Link>
             <div className="flex items-center gap-4">
-              <Link href="/goals" className="text-sm text-neutral-400 hover:text-white transition-colors">
+              <Link
+                href="/goals"
+                className="text-sm text-neutral-400 hover:text-white transition-colors"
+              >
                 Dashboard
               </Link>
               <div className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white font-semibold">
-                {profile.name.charAt(0).toUpperCase() || 'U'}
+                {profile.name.charAt(0).toUpperCase() || "U"}
               </div>
             </div>
           </div>
@@ -161,7 +164,9 @@ export default function ProfilePage() {
                 <input
                   type="text"
                   value={editedProfile.name}
-                  onChange={(e) => setEditedProfile({ ...editedProfile, name: e.target.value })}
+                  onChange={(e) =>
+                    setEditedProfile({ ...editedProfile, name: e.target.value })
+                  }
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500 transition-colors"
                 />
               </div>
@@ -172,7 +177,12 @@ export default function ProfilePage() {
                 <input
                   type="email"
                   value={editedProfile.email}
-                  onChange={(e) => setEditedProfile({ ...editedProfile, email: e.target.value })}
+                  onChange={(e) =>
+                    setEditedProfile({
+                      ...editedProfile,
+                      email: e.target.value,
+                    })
+                  }
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500 transition-colors"
                 />
               </div>
@@ -184,7 +194,12 @@ export default function ProfilePage() {
                   <input
                     type="number"
                     value={editedProfile.age}
-                    onChange={(e) => setEditedProfile({ ...editedProfile, age: e.target.value })}
+                    onChange={(e) =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        age: e.target.value,
+                      })
+                    }
                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500 transition-colors"
                   />
                 </div>
@@ -195,7 +210,12 @@ export default function ProfilePage() {
                   <input
                     type="text"
                     value={editedProfile.occupation}
-                    onChange={(e) => setEditedProfile({ ...editedProfile, occupation: e.target.value })}
+                    onChange={(e) =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        occupation: e.target.value,
+                      })
+                    }
                     className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500 transition-colors"
                   />
                 </div>
@@ -206,25 +226,25 @@ export default function ProfilePage() {
               <div>
                 <p className="text-sm text-neutral-400 mb-1">Name</p>
                 <p className="font-semibold text-white text-lg">
-                  {profile.name || 'Not set'}
+                  {profile.name || "Not set"}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-neutral-400 mb-1">Email</p>
                 <p className="font-semibold text-white text-lg">
-                  {profile.email || 'Not set'}
+                  {profile.email || "Not set"}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-neutral-400 mb-1">Age</p>
                 <p className="font-semibold text-white text-lg">
-                  {profile.age || 'Not set'}
+                  {profile.age || "Not set"}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-neutral-400 mb-1">Occupation</p>
                 <p className="font-semibold text-white text-lg">
-                  {profile.occupation || 'Not set'}
+                  {profile.occupation || "Not set"}
                 </p>
               </div>
             </div>
@@ -236,15 +256,17 @@ export default function ProfilePage() {
           <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
             <span>🎯</span> Primary Financial Goal
           </h2>
-          
+
           {profile.primaryGoal && goalLabels[profile.primaryGoal] ? (
             <div className="flex items-center gap-4 p-4 bg-emerald-500/10 rounded-xl border border-emerald-500/30">
-              <span className="text-5xl">{goalLabels[profile.primaryGoal].emoji}</span>
+              <span className="text-5xl">
+                {goalLabels[profile.primaryGoal].emoji}
+              </span>
               <div>
                 <h3 className="font-bold text-white text-xl">
                   {goalLabels[profile.primaryGoal].title}
                 </h3>
-                <Link 
+                <Link
                   href="/goals"
                   className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors"
                 >
@@ -254,7 +276,13 @@ export default function ProfilePage() {
             </div>
           ) : (
             <p className="text-neutral-400">
-              No primary goal set. <Link href="/onboarding" className="text-emerald-400 hover:text-emerald-300 font-semibold">Complete onboarding</Link>
+              No primary goal set.{" "}
+              <Link
+                href="/onboarding"
+                className="text-emerald-400 hover:text-emerald-300 font-semibold"
+              >
+                Complete onboarding
+              </Link>
             </p>
           )}
         </div>
@@ -265,39 +293,49 @@ export default function ProfilePage() {
             <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
               <span>🧠</span> Your Money Style
             </h2>
-            
+
             <div className="space-y-4">
               <div>
-                <p className="text-sm text-neutral-400 mb-1">Personality Type</p>
-                <p className="font-bold text-white text-3xl mb-2">{moneyStyle.type}</p>
+                <p className="text-sm text-neutral-400 mb-1">
+                  Personality Type
+                </p>
+                <p className="font-bold text-white text-3xl mb-2">
+                  {moneyStyle.type}
+                </p>
                 <p className="text-neutral-400 leading-relaxed">
                   {moneyStyle.moneyStyleDescription}
                 </p>
               </div>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-white/10">
                 <div>
                   <p className="text-xs text-neutral-400 mb-1">Energy</p>
                   <p className="font-semibold text-white">
-                    {moneyStyle.type.charAt(0) === 'E' ? 'Extrovert' : 'Introvert'}
+                    {moneyStyle.type.charAt(0) === "E"
+                      ? "Extrovert"
+                      : "Introvert"}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-neutral-400 mb-1">Information</p>
                   <p className="font-semibold text-white">
-                    {moneyStyle.type.charAt(1) === 'S' ? 'Sensing' : 'Intuitive'}
+                    {moneyStyle.type.charAt(1) === "S"
+                      ? "Sensing"
+                      : "Intuitive"}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-neutral-400 mb-1">Decisions</p>
                   <p className="font-semibold text-white">
-                    {moneyStyle.type.charAt(2) === 'T' ? 'Thinking' : 'Feeling'}
+                    {moneyStyle.type.charAt(2) === "T" ? "Thinking" : "Feeling"}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-neutral-400 mb-1">Structure</p>
                   <p className="font-semibold text-white">
-                    {moneyStyle.type.charAt(3) === 'J' ? 'Judging' : 'Perceiving'}
+                    {moneyStyle.type.charAt(3) === "J"
+                      ? "Judging"
+                      : "Perceiving"}
                   </p>
                 </div>
               </div>
@@ -317,7 +355,7 @@ export default function ProfilePage() {
           <h2 className="text-2xl font-bold text-white mb-4 flex items-center gap-2">
             <span>⚡</span> Quick Actions
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Link
               href="/goals"
@@ -329,7 +367,9 @@ export default function ProfilePage() {
                   <h3 className="font-semibold text-white group-hover:text-emerald-400 transition-colors">
                     Manage Goals
                   </h3>
-                  <p className="text-sm text-neutral-400">Add or update your financial goals</p>
+                  <p className="text-sm text-neutral-400">
+                    Add or update your financial goals
+                  </p>
                 </div>
               </div>
             </Link>
@@ -344,7 +384,9 @@ export default function ProfilePage() {
                   <h3 className="font-semibold text-white group-hover:text-emerald-400 transition-colors">
                     View Insights
                   </h3>
-                  <p className="text-sm text-neutral-400">See your behavioral patterns</p>
+                  <p className="text-sm text-neutral-400">
+                    See your behavioral patterns
+                  </p>
                 </div>
               </div>
             </Link>
@@ -359,7 +401,9 @@ export default function ProfilePage() {
                   <h3 className="font-semibold text-white group-hover:text-emerald-400 transition-colors">
                     Action Plan
                   </h3>
-                  <p className="text-sm text-neutral-400">See your prioritized tasks</p>
+                  <p className="text-sm text-neutral-400">
+                    See your prioritized tasks
+                  </p>
                 </div>
               </div>
             </Link>
@@ -374,7 +418,9 @@ export default function ProfilePage() {
                   <h3 className="font-semibold text-white group-hover:text-emerald-400 transition-colors">
                     Restart Onboarding
                   </h3>
-                  <p className="text-sm text-neutral-400">Go through setup again</p>
+                  <p className="text-sm text-neutral-400">
+                    Go through setup again
+                  </p>
                 </div>
               </div>
             </Link>

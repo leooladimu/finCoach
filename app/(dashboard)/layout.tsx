@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useUser } from '@/lib/hooks/useUser';
-import { getUserProfile } from '@/lib/kv';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/lib/hooks/useUser";
+import { getUserProfile } from "@/lib/kv";
 
 export default function DashboardLayout({
   children,
@@ -21,7 +21,7 @@ export default function DashboardLayout({
 
       // If not signed in, redirect to sign-in
       if (!isSignedIn) {
-        router.push('/sign-in');
+        router.push("/sign-in");
         return;
       }
 
@@ -29,22 +29,22 @@ export default function DashboardLayout({
       if (userId) {
         try {
           const profile = await getUserProfile(userId);
-          
+
           // If no profile or no money style, redirect to onboarding
           if (!profile || !profile.moneyStyle) {
-            router.push('/onboarding');
+            router.push("/onboarding");
             return;
           }
-          
+
           setHasCompletedAssessment(true);
         } catch (error) {
-          console.error('Error checking profile:', error);
+          console.error("Error checking profile:", error);
           // If error, redirect to onboarding to be safe
-          router.push('/onboarding');
+          router.push("/onboarding");
           return;
         }
       }
-      
+
       setIsCheckingProfile(false);
     }
 

@@ -5,7 +5,7 @@ import { kv } from '@vercel/kv';
 export async function DELETE() {
   try {
     const { userId } = await auth();
-    
+
     if (!userId) {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -15,7 +15,7 @@ export async function DELETE() {
 
     // Delete the user's profile from KV
     await kv.del(`user:${userId}`);
-    
+
     return NextResponse.json({ success: true, message: 'Profile deleted' });
   } catch (error) {
     console.error('Error deleting profile:', error);

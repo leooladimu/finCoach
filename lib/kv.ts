@@ -52,7 +52,7 @@ const createMockKV = () => ({
 
 // Use real Vercel KV if credentials are present, otherwise use mock
 let kv: any;
-const hasKVCredentials = (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN)||
+const hasKVCredentials = (process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN) ||
   process.env.REDIS_URL;
 
 if (hasKVCredentials) {
@@ -101,11 +101,11 @@ export async function saveFinancialSnapshot(
 ): Promise<void> {
   // Store latest snapshot
   await kv.set(keys.userFinances(userId), snapshot);
-  
+
   // Also append to time-series list (optional: keep last 90 days)
   const timeSeriesKey = `${keys.userFinances(userId)}:history`;
   await kv.lpush(timeSeriesKey, snapshot);
-  
+
   // Trim to last 90 entries (approximately 90 days if daily sync)
   await kv.ltrim(timeSeriesKey, 0, 89);
 }
@@ -131,10 +131,10 @@ export async function trackBehavior(
   action: BehaviorAction
 ): Promise<void> {
   const actionsKey = keys.userActions(userId);
-  
+
   // Prepend to list (newest first)
   await kv.lpush(actionsKey, action);
-  
+
   // Keep last 1000 actions
   await kv.ltrim(actionsKey, 0, 999);
 }
@@ -163,7 +163,7 @@ export async function saveContradiction(
   contradiction: Contradiction
 ): Promise<void> {
   const contradictionsKey = keys.userContradictions(userId);
-  
+
   // Store by contradiction ID
   await kv.hset(contradictionsKey, {
     [contradiction.id]: contradiction,
@@ -178,15 +178,15 @@ export async function getContradictions(
   const contradictionsMap = await kv.hgetall(
     contradictionsKey
   ) as Record<string, Contradiction> | null;
-  
+
   if (!contradictionsMap) return [];
-  
+
   const contradictions = Object.values(contradictionsMap) as Contradiction[];
-  
+
   if (onlyUnresolved) {
     return contradictions.filter((c: Contradiction) => !c.resolved);
   }
-  
+
   return contradictions;
 }
 
@@ -199,13 +199,13 @@ export async function updateContradiction(
   const contradictions = await kv.hgetall(
     contradictionsKey
   ) as Record<string, Contradiction> | null;
-  
+
   if (!contradictions || !contradictions[contradictionId]) {
     throw new Error(`Contradiction ${contradictionId} not found`);
   }
-  
+
   const updated = { ...contradictions[contradictionId], ...updates };
-  
+
   await kv.hset(contradictionsKey, {
     [contradictionId]: updated,
   });
@@ -222,9 +222,9 @@ export async function saveGoal(goal: FinancialGoal): Promise<void> {
 export async function getGoals(userId: string): Promise<FinancialGoal[]> {
   const goalsKey = keys.userGoals(userId);
   const goalsMap = await kv.hgetall(goalsKey) as Record<string, FinancialGoal> | null;
-  
+
   if (!goalsMap) return [];
-  
+
   return Object.values(goalsMap) as FinancialGoal[];
 }
 
@@ -241,13 +241,13 @@ export async function updateGoal(
 ): Promise<void> {
   const goalsKey = keys.userGoals(userId);
   const goal = await kv.hget(goalsKey, goalId) as FinancialGoal | null;
-  
+
   if (!goal) {
     throw new Error(`Goal ${goalId} not found`);
   }
-  
+
   const updated = { ...goal, ...updates, updatedAt: new Date().toISOString() };
-  
+
   await kv.hset(goalsKey, {
     [goalId]: updated,
   });
@@ -269,9 +269,9 @@ export async function saveTask(task: Task): Promise<void> {
 export async function getTasks(userId: string): Promise<Task[]> {
   const tasksKey = keys.userTasks(userId);
   const tasksMap = await kv.hgetall(tasksKey) as Record<string, Task> | null;
-  
+
   if (!tasksMap) return [];
-  
+
   return Object.values(tasksMap) as Task[];
 }
 
@@ -282,13 +282,13 @@ export async function updateTask(
 ): Promise<void> {
   const tasksKey = keys.userTasks(userId);
   const task = await kv.hget(tasksKey, taskId) as Task | null;
-  
+
   if (!task) {
     throw new Error(`Task ${taskId} not found`);
   }
-  
+
   const updated = { ...task, ...updates, updatedAt: new Date().toISOString() };
-  
+
   await kv.hset(tasksKey, {
     [taskId]: updated,
   });
@@ -306,7 +306,7 @@ export async function getSpendingByCategory(
 ): Promise<Record<string, number>> {
   const history = await getFinancialHistory(userId, days);
   const categoryTotals: Record<string, number> = {};
-  
+
   history.forEach(snapshot => {
     snapshot.transactions.forEach(transaction => {
       if (transaction.amount < 0) { // Spending (negative amounts)
@@ -315,17 +315,17 @@ export async function getSpendingByCategory(
       }
     });
   });
-  
+
   return categoryTotals;
 }
 
 export async function calculateSavingsRate(userId: string): Promise<number> {
   const snapshot = await getLatestFinancialSnapshot(userId);
-  
+
   if (!snapshot || snapshot.monthlyIncome === 0) {
     return 0;
   }
-  
+
   const monthlyNet = snapshot.monthlyIncome - snapshot.monthlyExpenses;
   return (monthlyNet / snapshot.monthlyIncome) * 100;
 }
@@ -370,7 +370,7 @@ export async function initializeMockData(userId: string): Promise<void> {
     transactions: [
       // Housing
       { id: 't1', date: '2025-12-01', amount: -2100, category: 'Housing', merchant: 'Property Management Co', accountId: 'checking-1' },
-      
+
       // Food & Dining (over budget to trigger contradiction)
       { id: 't2', date: '2025-12-03', amount: -45, category: 'Dining', merchant: 'Italian Restaurant', accountId: 'credit-1' },
       { id: 't3', date: '2025-12-05', amount: -12, category: 'Dining', merchant: 'Starbucks', accountId: 'credit-1' },
@@ -385,18 +385,18 @@ export async function initializeMockData(userId: string): Promise<void> {
       { id: 't12', date: '2025-12-22', amount: -110, category: 'Food & Dining', merchant: 'Whole Foods', accountId: 'checking-1' },
       { id: 't13', date: '2025-12-24', amount: -55, category: 'Dining', merchant: 'Brunch Spot', accountId: 'credit-1' },
       { id: 't14', date: '2025-12-26', amount: -78, category: 'Dining', merchant: 'Mexican Restaurant', accountId: 'credit-1' },
-      
+
       // Transportation (under budget)
       { id: 't15', date: '2025-12-02', amount: -50, category: 'Transportation', merchant: 'Shell', accountId: 'checking-1' },
       { id: 't16', date: '2025-12-15', amount: -45, category: 'Transportation', merchant: 'Chevron', accountId: 'checking-1' },
       { id: 't17', date: '2025-12-20', amount: -25, category: 'Transportation', merchant: 'Uber', accountId: 'credit-1' },
-      
+
       // Entertainment (over budget)
       { id: 't18', date: '2025-12-04', amount: -120, category: 'Entertainment', merchant: 'Ticketmaster', accountId: 'credit-1' },
       { id: 't19', date: '2025-12-11', amount: -65, category: 'Entertainment', merchant: 'Streaming Services', accountId: 'checking-1' },
       { id: 't20', date: '2025-12-19', amount: -45, category: 'Entertainment', merchant: 'AMC Theaters', accountId: 'credit-1' },
       { id: 't21', date: '2025-12-25', amount: -85, category: 'Entertainment', merchant: 'Steam', accountId: 'credit-1' },
-      
+
       // Shopping (many small impulse buys - potential J type contradiction)
       { id: 't22', date: '2025-12-06', amount: -15, category: 'Shopping', merchant: 'Target', accountId: 'checking-1' },
       { id: 't23', date: '2025-12-08', amount: -12, category: 'Shopping', merchant: 'Amazon', accountId: 'credit-1' },
@@ -406,16 +406,16 @@ export async function initializeMockData(userId: string): Promise<void> {
       { id: 't27', date: '2025-12-21', amount: -14, category: 'Shopping', merchant: 'Amazon', accountId: 'credit-1' },
       { id: 't28', date: '2025-12-23', amount: -95, category: 'Shopping', merchant: 'H&M', accountId: 'credit-1' },
       { id: 't29', date: '2025-12-27', amount: -19, category: 'Shopping', merchant: 'Walmart', accountId: 'checking-1' },
-      
+
       // Utilities
       { id: 't30', date: '2025-12-05', amount: -120, category: 'Utilities', merchant: 'PG&E', accountId: 'checking-1' },
       { id: 't31', date: '2025-12-15', amount: -80, category: 'Utilities', merchant: 'Comcast', accountId: 'checking-1' },
       { id: 't32', date: '2025-12-20', amount: -60, category: 'Utilities', merchant: 'T-Mobile', accountId: 'checking-1' },
-      
+
       // Healthcare
       { id: 't33', date: '2025-12-08', amount: -25, category: 'Healthcare', merchant: 'CVS Pharmacy', accountId: 'checking-1' },
       { id: 't34', date: '2025-12-22', amount: -150, category: 'Healthcare', merchant: 'Medical Center', accountId: 'checking-1' },
-      
+
       // Investments
       { id: 't35', date: '2025-12-01', amount: -500, category: 'Investment', merchant: 'Vanguard', accountId: 'checking-1' },
       { id: 't36', date: '2025-12-15', amount: -500, category: 'Investment', merchant: 'Vanguard', accountId: 'checking-1' },
@@ -424,6 +424,6 @@ export async function initializeMockData(userId: string): Promise<void> {
     monthlyIncome: 6000,
     monthlyExpenses: 4500,
   };
-  
+
   await kv.set(keys.userFinances(userId), mockSnapshot);
 }

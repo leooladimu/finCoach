@@ -15,15 +15,15 @@ export async function detectContradictions(
   profile: UserProfile
 ): Promise<Contradiction[]> {
   const contradictions: Contradiction[] = [];
-  
+
   // Get user's behavioral data
   const actions = await getBehaviorHistory(userId, 200);
   const financialSnapshot = await getLatestFinancialSnapshot(userId);
-  
+
   if (!financialSnapshot || !profile.statedPreferences) {
     return contradictions; // Not enough data yet
   }
-  
+
   // Check stated risk tolerance vs actual investment behavior
   if (profile.statedPreferences.riskTolerance === 'conservative') {
     const riskContradiction = checkRiskToleranceContradiction(
@@ -35,7 +35,7 @@ export async function detectContradictions(
       contradictions.push(riskContradiction);
     }
   }
-  
+
   // Check stated savings goal vs actual spending patterns
   if (profile.statedPreferences.savingsGoal) {
     const savingsContradiction = checkSavingsGoalContradiction(
@@ -47,7 +47,7 @@ export async function detectContradictions(
       contradictions.push(savingsContradiction);
     }
   }
-  
+
   // Check priority goals vs spending allocation
   if (profile.statedPreferences.priorityGoals) {
     const priorityContradiction = checkPriorityGoalsContradiction(
@@ -59,7 +59,7 @@ export async function detectContradictions(
       contradictions.push(priorityContradiction);
     }
   }
-  
+
   // Check MBTI personality alignment with spending patterns
   const personalityContradiction = checkPersonalityAlignment(
     profile,
@@ -86,7 +86,7 @@ export async function detectContradictions(
   if (positivePattern) {
     contradictions.push(positivePattern);
   }
-  
+
   return contradictions;
 }
 
@@ -147,16 +147,16 @@ function checkPersonalityAlignment(
   _actions: BehaviorAction[]
 ): Contradiction | null {
   const moneyStyle = profile.moneyStyle?.type;
-  
+
   // Judgers (J) tend to plan and structure - flag if too many small impulse purchases
   if (moneyStyle?.includes('J')) {
     const smallTransactions = snapshot.transactions.filter(
-      t => Math.abs(t.amount) < 20 && 
-      (t.category === 'Shopping' || t.category === 'Dining')
+      t => Math.abs(t.amount) < 20 &&
+        (t.category === 'Shopping' || t.category === 'Dining')
     );
-    
+
     const impulseBuyPercent = (smallTransactions.length / snapshot.transactions.length) * 100;
-    
+
     if (impulseBuyPercent > 40) {
       return {
         id: `contradiction-${Date.now()}-personality-j`,
@@ -181,25 +181,25 @@ function checkPersonalityAlignment(
       };
     }
   }
-  
+
   // Sensors (S) are concrete and present-focused - flag if too much in abstract future investments without emergency fund
   if (moneyStyle?.includes('S')) {
     // Check if there's adequate emergency fund (3+ months expenses in savings)
     const monthlySavings = snapshot.accounts
       .filter(a => a.type === 'savings')
       .reduce((sum, a) => sum + a.balance, 0);
-    
+
     const monthlyExpenses = snapshot.monthlyExpenses; // Monthly expenses from snapshot
     const emergencyFundMonths = monthlySavings / (monthlyExpenses || 1);
     const hasEmergencyFund = emergencyFundMonths >= 3;
-    
+
     if (!hasEmergencyFund) {
       const investmentSpending = snapshot.transactions
         .filter(t => t.category === 'Investment' || t.category === 'Retirement')
         .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-      
+
       const investmentPercent = (investmentSpending / snapshot.monthlyIncome) * 100;
-      
+
       if (investmentPercent > 15) {
         return {
           id: `contradiction-${Date.now()}-personality-s`,
@@ -225,7 +225,7 @@ function checkPersonalityAlignment(
       }
     }
   }
-  
+
   return null;
 }
 
@@ -236,7 +236,7 @@ function checkCategorySpending(
   snapshot: FinancialSnapshot
 ): Contradiction | null {
   const analysis = analyzeSpendingPatterns(snapshot.transactions);
-  
+
   // Recommended percentages of income
   const recommendations = {
     'Food & Dining': 15,
@@ -245,11 +245,11 @@ function checkCategorySpending(
     'Transportation': 15,
     'Housing': 30,
   };
-  
+
   // Find the most over-budget category
   let maxOverage = 0;
   let overCategory = '';
-  
+
   analysis.categoryBreakdown.forEach(cat => {
     const recommended = recommendations[cat.category as keyof typeof recommendations];
     if (recommended && cat.percentage > recommended * 1.3) { // 30% over recommendation
@@ -260,11 +260,11 @@ function checkCategorySpending(
       }
     }
   });
-  
+
   if (overCategory) {
     const actual = analysis.categoryBreakdown.find(c => c.category === overCategory);
     const recommended = recommendations[overCategory as keyof typeof recommendations];
-    
+
     return {
       id: `contradiction-${Date.now()}-category`,
       detectedAt: new Date().toISOString(),
@@ -287,7 +287,7 @@ function checkCategorySpending(
       resolved: false,
     };
   }
-  
+
   return null;
 }
 
@@ -299,7 +299,7 @@ function detectPositivePatterns(
   snapshot: FinancialSnapshot
 ): Contradiction | null {
   const analysis = analyzeSpendingPatterns(snapshot.transactions);
-  
+
   // Celebrate if essential spending is in healthy range (50-70%)
   if (analysis.essentialPercent >= 50 && analysis.essentialPercent <= 70) {
     return {
@@ -324,7 +324,7 @@ function detectPositivePatterns(
       resolved: false,
     };
   }
-  
+
   return null;
 }
 
@@ -336,16 +336,16 @@ function checkRiskToleranceContradiction(
   // TODO: Implement risk tolerance analysis
   // Look for high-volatility investment transactions
   // Compare against stated conservative preference
-  
+
   // Example logic:
   const investmentTransactions = snapshot.transactions.filter(
     t => t.category === 'Investment' || t.category === 'Cryptocurrency'
   );
-  
+
   const highRiskCount = investmentTransactions.filter(
     t => t.amount > snapshot.monthlyIncome * 0.1 // More than 10% of monthly income
   ).length;
-  
+
   if (profile.statedPreferences?.riskTolerance === 'conservative' && highRiskCount > 3) {
     return {
       id: `contradiction-${Date.now()}-risk`,
@@ -367,7 +367,7 @@ function checkRiskToleranceContradiction(
       resolved: false,
     };
   }
-  
+
   return null;
 }
 
@@ -378,14 +378,14 @@ function checkSavingsGoalContradiction(
 ): Contradiction | null {
   // TODO: Implement savings goal contradiction check
   // Compare stated savings goal with actual savings rate
-  
+
   if (!profile.statedPreferences?.savingsGoal) {
     return null;
   }
-  
+
   const actualMonthlySavings = snapshot.monthlyIncome - snapshot.monthlyExpenses;
   const requiredMonthlySavings = profile.statedPreferences.savingsGoal / 12; // Rough calculation
-  
+
   // If spending more than earning or saving less than 50% of required amount
   if (actualMonthlySavings < requiredMonthlySavings * 0.5) {
     return {
@@ -408,7 +408,7 @@ function checkSavingsGoalContradiction(
       resolved: false,
     };
   }
-  
+
   return null;
 }
 
@@ -419,21 +419,21 @@ function checkPriorityGoalsContradiction(
 ): Contradiction | null {
   // TODO: Implement priority goals contradiction check
   // See if spending aligns with stated priority goals
-  
+
   // Example: User says "debt payoff" is priority but discretionary spending is high
   if (profile.statedPreferences?.priorityGoals?.includes('Pay off debt')) {
     const discretionarySpending = snapshot.transactions
-      .filter(t => 
-        t.category === 'Entertainment' || 
-        t.category === 'Shopping' || 
+      .filter(t =>
+        t.category === 'Entertainment' ||
+        t.category === 'Shopping' ||
         t.category === 'Dining'
       )
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-    
+
     const debtPayments = snapshot.transactions
       .filter(t => t.category === 'Loan Payment' || t.category === 'Credit Card Payment')
       .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-    
+
     // If discretionary spending exceeds debt payments
     if (discretionarySpending > debtPayments) {
       return {
@@ -457,7 +457,7 @@ function checkPriorityGoalsContradiction(
       };
     }
   }
-  
+
   return null;
 }
 
@@ -470,12 +470,12 @@ export function generateContradictionNudge(
   moneyStyle?: string
 ): string {
   const { type } = contradiction;
-  
+
   // Adapt tone based on MBTI
   // T types: Direct, logical
   // F types: Empathetic, values-focused
   const isThinking = moneyStyle?.includes('T');
-  
+
   if (type === 'stated_vs_actual') {
     if (isThinking) {
       return `I noticed a pattern: ${contradiction.actual.description}. This doesn't match your stated ${contradiction.stated.description}. Worth analyzing?`;
@@ -483,7 +483,7 @@ export function generateContradictionNudge(
       return `I wanted to check in: ${contradiction.actual.description}. I remember you mentioned ${contradiction.stated.description}. How are you feeling about this?`;
     }
   }
-  
+
   if (type === 'goal_vs_behavior') {
     if (isThinking) {
       return `Data point: ${contradiction.actual.description}. This may impact your goal to ${contradiction.stated.description}. Let's strategize.`;
@@ -491,6 +491,6 @@ export function generateContradictionNudge(
       return `I see you're working toward ${contradiction.stated.description}, but ${contradiction.actual.description}. No judgment—let's talk about what's driving this.`;
     }
   }
-  
+
   return `I noticed something worth discussing: ${contradiction.actual.description}`;
 }

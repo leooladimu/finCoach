@@ -57,10 +57,10 @@ type LiabilitiesWebhook = PlaidWebhookBase & {
   webhook_code: 'DEFAULT_UPDATE' | 'NEW_AVAILABLE' | string;
 };
 
-type PlaidWebhook = 
-  | TransactionsWebhook 
-  | ItemWebhook 
-  | HoldingsWebhook 
+type PlaidWebhook =
+  | TransactionsWebhook
+  | ItemWebhook
+  | HoldingsWebhook
   | InvestmentsTransactionsWebhook
   | IdentityWebhook
   | InvestmentsWebhook

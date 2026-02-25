@@ -1,5 +1,5 @@
-import { SignOutButton } from '@clerk/nextjs';
-import Link from 'next/link';
+import { SignOutButton } from "@clerk/nextjs";
+import Link from "next/link";
 
 export default function SignOutPage() {
   return (
@@ -9,14 +9,14 @@ export default function SignOutPage() {
         <p className="text-neutral-400 mb-8">
           Are you sure you want to sign out of FinCoach?
         </p>
-        
+
         <div className="flex flex-col gap-3">
           <SignOutButton>
             <button className="w-full bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl font-semibold transition-all">
               Yes, Sign Me Out
             </button>
           </SignOutButton>
-          
+
           <Link
             href="/goals"
             className="w-full bg-white/5 hover:bg-white/10 text-white px-6 py-3 rounded-xl font-semibold transition-all border border-white/10"

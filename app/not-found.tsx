@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function NotFound() {
   return (
@@ -20,7 +20,8 @@ export default function NotFound() {
               Page Not Found
             </h2>
             <p className="text-stone-700 font-serif">
-              Looks like you&apos;ve wandered off the financial path. Let&apos;s get you back on track.
+              Looks like you&apos;ve wandered off the financial path. Let&apos;s
+              get you back on track.
             </p>
           </div>
 

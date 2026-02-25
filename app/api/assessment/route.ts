@@ -11,23 +11,23 @@ const RATE_LIMIT_WINDOW = 60 * 60 * 1000; // 1 hour in milliseconds
 function checkRateLimit(identifier: string): { allowed: boolean; remainingAttempts?: number; retryAfter?: number } {
   const now = Date.now();
   const submissions = submissionTracker.get(identifier) || [];
-  
+
   // Remove submissions older than the rate limit window
   const recentSubmissions = submissions.filter(timestamp => now - timestamp < RATE_LIMIT_WINDOW);
-  
+
   if (recentSubmissions.length >= MAX_SUBMISSIONS_PER_HOUR) {
     const oldestSubmission = Math.min(...recentSubmissions);
     const retryAfter = Math.ceil((oldestSubmission + RATE_LIMIT_WINDOW - now) / 1000);
     return { allowed: false, retryAfter };
   }
-  
+
   // Update tracker
   recentSubmissions.push(now);
   submissionTracker.set(identifier, recentSubmissions);
-  
-  return { 
-    allowed: true, 
-    remainingAttempts: MAX_SUBMISSIONS_PER_HOUR - recentSubmissions.length 
+
+  return {
+    allowed: true,
+    remainingAttempts: MAX_SUBMISSIONS_PER_HOUR - recentSubmissions.length
   };
 }
 
@@ -37,7 +37,7 @@ function calculateMBTIType(scores: MBTIScores): MBTIType {
   const S_or_N = scores.SN >= 0 ? 'N' : 'S';
   const T_or_F = scores.TF >= 0 ? 'F' : 'T';
   const J_or_P = scores.JP >= 0 ? 'P' : 'J';
-  
+
   return `${E_or_I}${S_or_N}${T_or_F}${J_or_P}` as MBTIType;
 }
 
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { userId, answers } = body;
-    
+
     // Validation 1: Check required fields
     if (!userId || !answers) {
       return NextResponse.json(
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     // Validation 3: Validate answer structure and values
     for (let i = 0; i < answers.length; i++) {
       const answer = answers[i];
-      
+
       if (typeof answer.questionId !== 'number') {
         return NextResponse.json(
           { error: `Invalid answer ${i}: questionId must be a number` },
@@ -112,19 +112,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Rate Limiting: Check submission rate
-    const clientIp = request.headers.get('x-forwarded-for') || 
-                     request.headers.get('x-real-ip') || 
-                     'unknown';
+    const clientIp = request.headers.get('x-forwarded-for') ||
+      request.headers.get('x-real-ip') ||
+      'unknown';
     const rateLimitIdentifier = `${userId}-${clientIp}`;
     const rateLimitCheck = checkRateLimit(rateLimitIdentifier);
 
     if (!rateLimitCheck.allowed) {
       return NextResponse.json(
-        { 
+        {
           error: `Too many submissions. Please try again in ${rateLimitCheck.retryAfter} seconds.`,
-          retryAfter: rateLimitCheck.retryAfter 
+          retryAfter: rateLimitCheck.retryAfter
         },
-        { 
+        {
           status: 429,
           headers: {
             'Retry-After': rateLimitCheck.retryAfter?.toString() || '3600',
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
         }
       );
     }
-    
+
     // Calculate scores from answers
     // answers is an array of { questionId, dimension, score }
     const scores: MBTIScores = {
@@ -143,19 +143,19 @@ export async function POST(request: NextRequest) {
       TF: 0,
       JP: 0,
     };
-    
+
     answers.forEach((answer: { questionId: number; dimension: string; score: number }) => {
       const dimension = answer.dimension as keyof MBTIScores;
       scores[dimension] += answer.score;
     });
-    
+
     // Determine MBTI type
     const type = calculateMBTIType(scores);
-    
+
     // Get descriptions
     const moneyStyleDescription = moneyStyleDescriptions[type] || 'Your unique money style';
     const coachingApproach = coachingApproaches[type] || 'Personalized coaching approach';
-    
+
     // Save to user profile (TODO: Enable when Vercel KV is configured)
     // await updateUserProfile(userId, {
     //   moneyStyle: {
@@ -164,14 +164,14 @@ export async function POST(request: NextRequest) {
     //     assessmentDate: new Date().toISOString(),
     //   },
     // });
-    
+
     const result: AssessmentResult = {
       type,
       scores,
       moneyStyleDescription,
       coachingApproach,
     };
-    
+
     return NextResponse.json(result, {
       headers: {
         'X-RateLimit-Limit': MAX_SUBMISSIONS_PER_HOUR.toString(),
@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Assessment error:', error);
-    
+
     // Provide more specific error messages
     if (error instanceof SyntaxError) {
       return NextResponse.json(
@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    
+
     return NextResponse.json(
       { error: 'Failed to process assessment. Please try again.' },
       { status: 500 }

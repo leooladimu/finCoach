@@ -143,7 +143,7 @@ export const handler = async (event: LambdaEvent): Promise<LambdaResponse> => {
     };
   } catch (error) {
     console.error('Error in contradiction detection:', error);
-    
+
     return {
       statusCode: 500,
       headers: {
@@ -179,7 +179,7 @@ function analyzeSpendingVsGoals(
   const discretionaryPercent = (discretionarySpending / totalSpending) * 100;
 
   // Check if user has savings goals but high discretionary spending
-  const savingsGoals = goals.filter(g => 
+  const savingsGoals = goals.filter(g =>
     g.category === 'savings' || g.title.toLowerCase().includes('save') || g.title.toLowerCase().includes('fund')
   );
 
@@ -256,7 +256,7 @@ function analyzeCategoryPatterns(
     const overagePercent = ((spentPercent - budgetPercent) / budgetPercent) * 100;
 
     if (overagePercent > 30) { // 30% over budget
-      const severity: 'low' | 'medium' | 'high' = 
+      const severity: 'low' | 'medium' | 'high' =
         overagePercent > 50 ? 'high' : overagePercent > 40 ? 'medium' : 'low';
 
       contradictions.push({
@@ -396,7 +396,7 @@ function detectPositivePatterns(
   // Check for goals with good progress
   goals.forEach(goal => {
     const progressPercent = (goal.currentAmount / goal.targetAmount) * 100;
-    
+
     if (progressPercent > 75) {
       contradictions.push({
         id: `positive-goal-${goal.id}-${Date.now()}`,
@@ -466,7 +466,7 @@ function adaptSuggestionToPersonality(baseSuggestion: string, mbtiType: string):
     // Add empathetic, values-focused language
     return `${baseSuggestion} Remember, small changes align with your values and long-term happiness.`;
   }
-  
+
   // Default for Thinkers: keep it logical and data-focused
   return baseSuggestion;
 }

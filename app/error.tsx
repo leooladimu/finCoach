@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import Link from 'next/link';
+import { useEffect } from "react";
+import Link from "next/link";
 
 export default function Error({
   error,
@@ -12,7 +12,7 @@ export default function Error({
 }) {
   useEffect(() => {
     // Log error to error reporting service
-    console.error('Application error:', error);
+    console.error("Application error:", error);
   }, [error]);
 
   return (
@@ -31,11 +31,12 @@ export default function Error({
               Something Went Wrong
             </h1>
             <p className="text-stone-700 font-serif">
-              We encountered an unexpected error. Don&apos;t worry, your data is safe.
+              We encountered an unexpected error. Don&apos;t worry, your data is
+              safe.
             </p>
           </div>
 
-          {process.env.NODE_ENV === 'development' && (
+          {process.env.NODE_ENV === "development" && (
             <div className="mb-6 bg-red-100/60 rounded-lg p-4 border border-red-300/50">
               <p className="text-sm font-mono text-red-900 break-all">
                 {error.message}

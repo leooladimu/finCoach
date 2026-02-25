@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { usePlaidLink } from 'react-plaid-link';
-import { useState, useCallback, useEffect } from 'react';
-import { Loader2 } from 'lucide-react';
+import { usePlaidLink } from "react-plaid-link";
+import { useState, useCallback, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 export function PlaidLinkButton({ userId }: { userId: string }) {
   const [linkToken, setLinkToken] = useState<string | null>(null);
@@ -11,33 +11,36 @@ export function PlaidLinkButton({ userId }: { userId: string }) {
 
   const createLinkToken = useCallback(async () => {
     if (loading || hasAttempted) return;
-    
-    console.log('Creating link token for userId:', userId);
+
+    console.log("Creating link token for userId:", userId);
     setLoading(true);
     setHasAttempted(true);
     try {
-      const response = await fetch('/api/plaid/create-link-token', {
-        method: 'POST',
+      const response = await fetch("/api/plaid/create-link-token", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ userId }),
       });
-      
-      console.log('Response status:', response.status);
-      
+
+      console.log("Response status:", response.status);
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        console.error('API error:', errorData);
-        throw new Error(errorData.error || 'Failed to create link token');
+        console.error("API error:", errorData);
+        throw new Error(errorData.error || "Failed to create link token");
       }
-      
+
       const data = await response.json();
-      console.log('Link token received:', data.link_token ? 'Yes' : 'No');
+      console.log("Link token received:", data.link_token ? "Yes" : "No");
       setLinkToken(data.link_token);
     } catch (error) {
-      console.error('Error creating link token:', error);
-      alert('Failed to initialize Plaid: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      console.error("Error creating link token:", error);
+      alert(
+        "Failed to initialize Plaid: " +
+          (error instanceof Error ? error.message : "Unknown error"),
+      );
       setLinkToken(null);
     } finally {
       setLoading(false);
@@ -45,24 +48,21 @@ export function PlaidLinkButton({ userId }: { userId: string }) {
     }
   }, [userId, loading, hasAttempted]);
 
-
   const onSuccess = async (publicToken: string) => {
     try {
-      await fetch('/api/plaid/exchange-token', {
-        method: 'POST',
+      await fetch("/api/plaid/exchange-token", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ publicToken,
-        userId }),
+        body: JSON.stringify({ publicToken, userId }),
       });
       // Refresh or redirect after successful connection
       window.location.reload();
     } catch (error) {
-      console.error('Error exchanging public token:', error);
+      console.error("Error exchanging public token:", error);
     }
   };
-
 
   const { open, ready } = usePlaidLink({
     token: linkToken,
@@ -70,13 +70,13 @@ export function PlaidLinkButton({ userId }: { userId: string }) {
     onExit: (err, metadata) => {
       setLinkToken(null);
       setHasAttempted(false);
-      console.log('Plaid Link exit:', { err, metadata });
+      console.log("Plaid Link exit:", { err, metadata });
       if (err) {
-        console.error('Plaid error:', err);
+        console.error("Plaid error:", err);
       }
     },
     onEvent: (eventName, metadata) => {
-      console.log('Plaid Link event:', { eventName, metadata });
+      console.log("Plaid Link event:", { eventName, metadata });
     },
   });
 

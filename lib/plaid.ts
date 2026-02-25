@@ -26,7 +26,7 @@ export async function createLinkToken(userId: string) {
       country_codes: [CountryCode.Us],
       language: 'en',
     });
-    
+
     return response.data.link_token;
   } catch (error) {
     console.error('Error creating link token:', error);
@@ -40,7 +40,7 @@ export async function exchangePublicToken(publicToken: string) {
     const response = await plaidClient.itemPublicTokenExchange({
       public_token: publicToken,
     });
-    
+
     return {
       accessToken: response.data.access_token,
       itemId: response.data.item_id,
@@ -57,7 +57,7 @@ export async function getBalances(accessToken: string) {
     const response = await plaidClient.accountsBalanceGet({
       access_token: accessToken,
     });
-    
+
     return response.data.accounts;
   } catch (error) {
     console.error('Error fetching balances:', error);
@@ -77,7 +77,7 @@ export async function getTransactions(
       start_date: startDate,
       end_date: endDate,
     });
-    
+
     return response.data.transactions;
   } catch (error) {
     console.error('Error fetching transactions:', error);
@@ -91,18 +91,18 @@ export async function getInstitution(accessToken: string) {
     const itemResponse = await plaidClient.itemGet({
       access_token: accessToken,
     });
-    
+
     const institutionId = itemResponse.data.item.institution_id;
-    
+
     if (institutionId) {
       const institutionResponse = await plaidClient.institutionsGetById({
         institution_id: institutionId,
         country_codes: [CountryCode.Us],
       });
-      
+
       return institutionResponse.data.institution;
     }
-    
+
     return null;
   } catch (error) {
     console.error('Error fetching institution:', error);
