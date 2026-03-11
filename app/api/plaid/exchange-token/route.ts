@@ -1,6 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { exchangePublicToken, getBalances, getInstitution } from '@/lib/plaid';
-// import { saveFinancialSnapshot } from '@/lib/kv';
+import { exchangePublicToken, getBalances, getTransactions, getInstitution } from '@/lib/plaid';
+import { saveFinancialSnapshot, updateUserProfile, savePlaidItemIndex } from '@/lib/kv';
+import type { FinancialSnapshot, Account, Transaction } from '@/types';
+
+function mapAccountType(type: string, subtype: string | null): Account['type'] {
+  if (type === 'depository') {
+    return subtype === 'savings' ? 'savings' : 'checking';
+  }
+  if (type === 'credit') return 'credit';
+  if (type === 'investment') return 'investment';
+  if (type === 'loan') return 'loan';
+  return 'checking';
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +27,6 @@ export async function POST(request: NextRequest) {
 
     // Check if Plaid credentials are configured
     if (!process.env.PLAID_CLIENT_ID || !process.env.PLAID_SECRET) {
-      // Return mock data for development
       return NextResponse.json({
         success: true,
         message: 'Bank account connected successfully (demo mode)',
@@ -26,66 +36,95 @@ export async function POST(request: NextRequest) {
             name: 'Demo Checking',
             type: 'depository',
             subtype: 'checking',
-            balances: {
-              available: 2500.75,
-              current: 2750.50,
-            },
+            balances: { available: 2500.75, current: 2750.50 },
           },
           {
             account_id: 'demo-savings-456',
             name: 'Demo Savings',
             type: 'depository',
             subtype: 'savings',
-            balances: {
-              available: 15420.00,
-              current: 15420.00,
-            },
+            balances: { available: 15420.00, current: 15420.00 },
           },
         ],
-        institution: {
-          name: 'Demo Bank',
-          institution_id: 'demo_bank',
-        },
+        institution: { name: 'Demo Bank', institution_id: 'demo_bank' },
       });
     }
 
-    // Exchange public token for access token
-    const { accessToken } = await exchangePublicToken(publicToken);
+    // Exchange public token for access token + item ID
+    const { accessToken, itemId } = await exchangePublicToken(publicToken);
 
-    // Get account balances
-    const accounts = await getBalances(accessToken);
+    // Write the item→userId index so webhooks can resolve ownership
+    await savePlaidItemIndex(itemId, userId);
 
-    // Get institution info
-    const institution = await getInstitution(accessToken);
+    // Persist the access token on the user profile for future fetches
+    await updateUserProfile(userId, {
+      plaidAccessToken: accessToken,
+      plaidItemId: itemId,
+    } as any);
 
-    // TODO: Save to Vercel KV
-    // await saveFinancialSnapshot(userId, {
-    //   timestamp: new Date().toISOString(),
-    //   accounts: accounts.map(acc => ({
-    //     id: acc.account_id,
-    //     name: acc.name,
-    //     type: acc.type,
-    //     subtype: acc.subtype || '',
-    //     balance: acc.balances.current || 0,
-    //   })),
-    //   plaidAccessToken: accessToken,
-    //   plaidItemId: itemId,
-    // });
+    // Fetch accounts and last 30 days of transactions in parallel
+    const today = new Date();
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+    const startDate = thirtyDaysAgo.toISOString().split('T')[0];
+    const endDate = today.toISOString().split('T')[0];
+
+    const [plaidAccounts, plaidTransactions, institution] = await Promise.all([
+      getBalances(accessToken),
+      getTransactions(accessToken, startDate, endDate),
+      getInstitution(accessToken),
+    ]);
+
+    // Map Plaid accounts to our Account type
+    const accounts: Account[] = plaidAccounts.map((acc) => ({
+      id: acc.account_id,
+      name: acc.name,
+      type: mapAccountType(acc.type, acc.subtype ?? null),
+      balance: acc.balances.current ?? 0,
+      institution: institution?.name ?? 'Unknown',
+    }));
+
+    // Map Plaid transactions to our Transaction type
+    const transactions: Transaction[] = plaidTransactions.map((txn) => ({
+      id: txn.transaction_id,
+      date: txn.date,
+      amount: -txn.amount, // Plaid uses positive = debit; we use negative = spending
+      category: (txn.personal_finance_category?.primary ?? txn.category?.[0] ?? 'Other'),
+      merchant: txn.merchant_name ?? txn.name,
+      accountId: txn.account_id,
+    }));
+
+    // Compute summary stats
+    const netWorth = accounts.reduce((sum, acc) => sum + acc.balance, 0);
+    const spending = transactions.filter((t) => t.amount < 0);
+    const income = transactions.filter((t) => t.amount > 0);
+    const monthlyExpenses = Math.abs(spending.reduce((s, t) => s + t.amount, 0));
+    const monthlyIncome = income.reduce((s, t) => s + t.amount, 0);
+
+    const snapshot: FinancialSnapshot = {
+      timestamp: new Date().toISOString(),
+      accounts,
+      transactions,
+      netWorth,
+      monthlyIncome,
+      monthlyExpenses,
+    };
+
+    await saveFinancialSnapshot(userId, snapshot);
 
     return NextResponse.json({
       success: true,
       message: 'Bank account connected successfully',
-      accounts: accounts.map(acc => ({
+      accounts: plaidAccounts.map((acc) => ({
         account_id: acc.account_id,
         name: acc.name,
         type: acc.type,
         subtype: acc.subtype,
         balances: acc.balances,
       })),
-      institution: institution ? {
-        name: institution.name,
-        institution_id: institution.institution_id,
-      } : null,
+      institution: institution
+        ? { name: institution.name, institution_id: institution.institution_id }
+        : null,
     });
   } catch (error) {
     console.error('Error exchanging token:', error);

@@ -16,44 +16,40 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-100 via-amber-50 to-red-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <div className="max-w-2xl w-full">
-        <div className="bg-gradient-to-br from-red-50 to-amber-50 rounded-lg border-4 border-double border-red-800/40 p-8 shadow-2xl relative overflow-hidden">
-          {/* Corner Decorations */}
-          <div className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-red-900/30" />
-          <div className="absolute top-0 right-0 w-8 h-8 border-r-2 border-t-2 border-red-900/30" />
-          <div className="absolute bottom-0 left-0 w-8 h-8 border-l-2 border-b-2 border-red-900/30" />
-          <div className="absolute bottom-0 right-0 w-8 h-8 border-r-2 border-b-2 border-red-900/30" />
+        <div className="glass rounded-2xl border border-red-500/20 p-8 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-red-500/5 to-transparent pointer-events-none" />
 
-          <div className="text-center mb-6">
+          <div className="relative text-center mb-6">
             <div className="text-6xl mb-4">😕</div>
-            <h1 className="text-3xl font-serif font-bold text-stone-900 mb-2">
+            <h1 className="text-3xl font-bold text-white mb-2">
               Something Went Wrong
             </h1>
-            <p className="text-stone-700 font-serif">
+            <p className="text-neutral-400">
               We encountered an unexpected error. Don&apos;t worry, your data is
               safe.
             </p>
           </div>
 
           {process.env.NODE_ENV === "development" && (
-            <div className="mb-6 bg-red-100/60 rounded-lg p-4 border border-red-300/50">
-              <p className="text-sm font-mono text-red-900 break-all">
+            <div className="relative mb-6 bg-red-500/10 rounded-xl p-4 border border-red-500/20">
+              <p className="text-sm font-mono text-red-400 break-all">
                 {error.message}
               </p>
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="relative flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={reset}
-              className="px-6 py-3 bg-gradient-to-r from-amber-800 to-red-900 text-stone-50 font-serif font-semibold rounded-lg shadow-md hover:shadow-lg transition-all"
+              className="px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all"
             >
               Try Again
             </button>
             <Link
               href="/"
-              className="px-6 py-3 bg-stone-50 text-stone-900 font-serif font-semibold rounded-lg border-2 border-stone-300 hover:border-amber-800 transition-all text-center"
+              className="px-6 py-3 glass text-neutral-200 font-semibold rounded-xl border border-white/10 hover:border-emerald-500/30 transition-all text-center"
             >
               Go Home
             </Link>

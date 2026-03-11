@@ -1,9 +1,11 @@
 import { Configuration, PlaidApi, PlaidEnvironments, Products, CountryCode } from 'plaid';
 
-// Initialize Plaid client
-// In production, use environment variables from .env.local
+// Resolve Plaid environment from PLAID_ENV, default to sandbox
+const plaidEnv = (process.env.PLAID_ENV || 'sandbox') as keyof typeof PlaidEnvironments;
+const basePath = PlaidEnvironments[plaidEnv] || PlaidEnvironments.sandbox;
+
 const configuration = new Configuration({
-  basePath: PlaidEnvironments.sandbox, // Use 'sandbox' for testing
+  basePath,
   baseOptions: {
     headers: {
       'PLAID-CLIENT-ID': process.env.PLAID_CLIENT_ID || '',

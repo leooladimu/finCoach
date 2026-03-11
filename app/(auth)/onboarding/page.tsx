@@ -1,16 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useUser } from '@/lib/hooks/useUser';
-import { saveUserProfile } from '@/lib/kv';
+import { saveUserProfileAction, getUserProfileAction } from '@/lib/actions';
 import { useClerk } from '@clerk/nextjs';
 
 export default function OnboardingWelcome() {
   const router = useRouter();
-  const { userId } = useUser();
+  const { userId, isLoaded } = useUser();
   const { signOut } = useClerk();
+
+  // Guard: if the user already completed the assessment, send them to the dashboard
+  useEffect(() => {
+    if (!isLoaded || !userId) return;
+    getUserProfileAction(userId).then((profile) => {
+      if (profile?.moneyStyle) {
+        router.replace('/goals');
+      }
+    });
+  }, [userId, isLoaded, router]);
   const [step, setStep] = useState(1);
   const [profile, setProfile] = useState({
     name: '',
@@ -28,7 +38,7 @@ export default function OnboardingWelcome() {
       const effectiveUserId = userId || 'demo-user-local';
       
       // Save to KV
-      await saveUserProfile({
+      await saveUserProfileAction({
         userId: effectiveUserId,
         email: profile.email,
         name: profile.name,

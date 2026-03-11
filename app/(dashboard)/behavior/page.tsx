@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import { DashboardNav } from "@/components/DashboardNav";
 import {
   LineChart,
   Line,
@@ -18,10 +19,11 @@ import {
   Cell,
 } from "recharts";
 import { motion } from "framer-motion";
-import type { AssessmentResult } from "@/types";
+import type { AssessmentResult, SpendingCategory } from "@/types";
 import { useContradictions } from "@/lib/hooks/useContradictions";
 import { useUser } from "@/lib/hooks/useUser";
-import { getUserProfile } from "@/lib/kv";
+import { getUserProfileAction, getSpendingDataAction } from "@/lib/actions";
+import { hydrateMoneyStyle } from "@/lib/assessment";
 
 export default function BehaviorPage() {
   const { userId, isLoaded } = useUser();
@@ -30,21 +32,18 @@ export default function BehaviorPage() {
   const [timeRange, setTimeRange] = useState<"week" | "month" | "year">(
     "month",
   );
+  const [spendingCategories, setSpendingCategories] = useState<SpendingCategory[]>([]);
+  const [spendingLoading, setSpendingLoading] = useState(true);
 
   // Load money style from KV
   useEffect(() => {
     async function loadMoneyStyle() {
       if (!isLoaded || !userId) return;
 
-      const profile = await getUserProfile(userId);
+      const profile = await getUserProfileAction(userId);
       if (profile?.moneyStyle) {
         // Convert profile moneyStyle to AssessmentResult format
-        setMoneyStyle({
-          type: profile.moneyStyle.type,
-          scores: profile.moneyStyle.scores,
-          moneyStyleDescription: "", // Will be populated if needed
-          coachingApproach: "", // Will be populated if needed
-        });
+        setMoneyStyle(hydrateMoneyStyle(profile.moneyStyle.type, profile.moneyStyle.scores));
       }
 
       // Set user name for avatar
@@ -56,330 +55,32 @@ export default function BehaviorPage() {
     loadMoneyStyle();
   }, [userId, isLoaded]);
 
+  // Load spending data from KV (real Plaid data or mock)
+  useEffect(() => {
+    async function loadSpendingData() {
+      if (!isLoaded || !userId) return;
+      setSpendingLoading(true);
+      try {
+        const categories = await getSpendingDataAction(userId, timeRange);
+        setSpendingCategories(categories);
+      } catch (err) {
+        console.error("Error loading spending data:", err);
+        setSpendingCategories([]);
+      } finally {
+        setSpendingLoading(false);
+      }
+    }
+    loadSpendingData();
+  }, [userId, isLoaded, timeRange]);
+
   // Use real contradiction detection
   const {
     contradictions: detectedContradictions,
     loading: contradictionsLoading,
   } = useContradictions(timeRange);
 
-  // Sample spending data that changes based on time range (in real app, this would come from Plaid)
-  const spendingDataByRange = {
-    week: {
-      categories: [
-        {
-          name: "Housing",
-          amount: 525,
-          budget: 500,
-          percent: 35,
-          color: "from-amber-700 to-amber-800",
-          emoji: "🏠",
-        },
-        {
-          name: "Food & Dining",
-          amount: 245,
-          budget: 200,
-          percent: 16,
-          color: "from-red-700 to-red-800",
-          emoji: "🍽️",
-        },
-        {
-          name: "Transportation",
-          amount: 95,
-          budget: 125,
-          percent: 6,
-          color: "from-orange-700 to-orange-800",
-          emoji: "🚗",
-        },
-        {
-          name: "Entertainment",
-          amount: 120,
-          budget: 75,
-          percent: 8,
-          color: "from-pink-700 to-pink-800",
-          emoji: "🎭",
-        },
-        {
-          name: "Shopping",
-          amount: 180,
-          budget: 125,
-          percent: 12,
-          color: "from-purple-700 to-purple-800",
-          emoji: "🛍️",
-        },
-        {
-          name: "Utilities",
-          amount: 70,
-          budget: 75,
-          percent: 5,
-          color: "from-blue-700 to-blue-800",
-          emoji: "💡",
-        },
-        {
-          name: "Healthcare",
-          amount: 45,
-          budget: 50,
-          percent: 3,
-          color: "from-green-700 to-green-800",
-          emoji: "⚕️",
-        },
-        {
-          name: "Other",
-          amount: 220,
-          budget: 250,
-          percent: 15,
-          color: "from-stone-700 to-stone-800",
-          emoji: "📦",
-        },
-      ],
-      contradictions: [
-        {
-          id: 1,
-          type: "spending-vs-goal",
-          severity: "medium",
-          title: "Food spending up 22% this week",
-          description:
-            "You're on track to exceed your monthly food budget if this pace continues.",
-          suggestion:
-            "Try meal prepping this weekend to reduce daily food costs.",
-          emoji: "🍽️",
-        },
-        {
-          id: 2,
-          type: "positive",
-          severity: "low",
-          title: "Transportation costs below average",
-          description:
-            "You've spent $30 less than usual on transportation this week.",
-          suggestion: "Great work! Keep tracking these savings.",
-          emoji: "✨",
-        },
-      ],
-    },
-    month: {
-      categories: [
-        {
-          name: "Housing",
-          amount: 2100,
-          budget: 2000,
-          percent: 35,
-          color: "from-amber-700 to-amber-800",
-          emoji: "🏠",
-        },
-        {
-          name: "Food & Dining",
-          amount: 950,
-          budget: 800,
-          percent: 16,
-          color: "from-red-700 to-red-800",
-          emoji: "🍽️",
-        },
-        {
-          name: "Transportation",
-          amount: 450,
-          budget: 500,
-          percent: 8,
-          color: "from-orange-700 to-orange-800",
-          emoji: "🚗",
-        },
-        {
-          name: "Entertainment",
-          amount: 380,
-          budget: 300,
-          percent: 6,
-          color: "from-pink-700 to-pink-800",
-          emoji: "🎭",
-        },
-        {
-          name: "Shopping",
-          amount: 720,
-          budget: 500,
-          percent: 12,
-          color: "from-purple-700 to-purple-800",
-          emoji: "🛍️",
-        },
-        {
-          name: "Utilities",
-          amount: 280,
-          budget: 300,
-          percent: 5,
-          color: "from-blue-700 to-blue-800",
-          emoji: "💡",
-        },
-        {
-          name: "Healthcare",
-          amount: 180,
-          budget: 200,
-          percent: 3,
-          color: "from-green-700 to-green-800",
-          emoji: "⚕️",
-        },
-        {
-          name: "Other",
-          amount: 940,
-          budget: 1000,
-          percent: 15,
-          color: "from-stone-700 to-stone-800",
-          emoji: "📦",
-        },
-      ],
-      contradictions: [
-        {
-          id: 1,
-          type: "spending-vs-goal",
-          severity: "high",
-          title: "Entertainment spending conflicts with savings goal",
-          description:
-            "You're spending 27% over budget on entertainment while your Emergency Fund goal is falling behind.",
-          suggestion:
-            "Consider reducing entertainment by $80/month to boost your emergency fund progress.",
-          emoji: "⚠️",
-        },
-        {
-          id: 2,
-          type: "pattern-change",
-          severity: "medium",
-          title: "Dining out increased 40% this month",
-          description:
-            "Your restaurant spending jumped from $680 to $950 compared to last month.",
-          suggestion:
-            "Was this intentional? If not, meal planning could save you ~$270/month.",
-          emoji: "📈",
-        },
-        {
-          id: 3,
-          type: "positive",
-          severity: "low",
-          title: "Great job staying under transportation budget!",
-          description:
-            "You spent $50 less than budgeted on transportation this month.",
-          suggestion:
-            "Keep it up! Consider redirecting these savings to your house down payment goal.",
-          emoji: "✨",
-        },
-      ],
-    },
-    year: {
-      categories: [
-        {
-          name: "Housing",
-          amount: 25200,
-          budget: 24000,
-          percent: 35,
-          color: "from-amber-700 to-amber-800",
-          emoji: "🏠",
-        },
-        {
-          name: "Food & Dining",
-          amount: 10800,
-          budget: 9600,
-          percent: 15,
-          color: "from-red-700 to-red-800",
-          emoji: "🍽️",
-        },
-        {
-          name: "Transportation",
-          amount: 5200,
-          budget: 6000,
-          percent: 7,
-          color: "from-orange-700 to-orange-800",
-          emoji: "🚗",
-        },
-        {
-          name: "Entertainment",
-          amount: 4800,
-          budget: 3600,
-          percent: 7,
-          color: "from-pink-700 to-pink-800",
-          emoji: "🎭",
-        },
-        {
-          name: "Shopping",
-          amount: 8400,
-          budget: 6000,
-          percent: 12,
-          color: "from-purple-700 to-purple-800",
-          emoji: "🛍️",
-        },
-        {
-          name: "Utilities",
-          amount: 3300,
-          budget: 3600,
-          percent: 5,
-          color: "from-blue-700 to-blue-800",
-          emoji: "💡",
-        },
-        {
-          name: "Healthcare",
-          amount: 2400,
-          budget: 2400,
-          percent: 3,
-          color: "from-green-700 to-green-800",
-          emoji: "⚕️",
-        },
-        {
-          name: "Other",
-          amount: 11500,
-          budget: 12000,
-          percent: 16,
-          color: "from-stone-700 to-stone-800",
-          emoji: "📦",
-        },
-      ],
-      contradictions: [
-        {
-          id: 1,
-          type: "spending-vs-goal",
-          severity: "high",
-          title: "Annual entertainment overspending: $1,200",
-          description:
-            "Over the past year, you've spent 33% more than budgeted on entertainment. That's money that could accelerate your house down payment by 4 months.",
-          suggestion:
-            "Set up a dedicated entertainment account with a strict monthly transfer to create a hard limit.",
-          emoji: "⚠️",
-        },
-        {
-          id: 2,
-          type: "pattern-change",
-          severity: "medium",
-          title: "Shopping expenses trending upward",
-          description:
-            "Shopping spending increased by 40% year-over-year, from $6,000 to $8,400.",
-          suggestion:
-            "Implement a 24-hour rule: wait a day before any purchase over $50.",
-          emoji: "📊",
-        },
-        {
-          id: 3,
-          type: "positive",
-          severity: "low",
-          title: "Excellent transportation optimization!",
-          description:
-            "You saved $800 on transportation this year vs budget. Carpooling and public transit are working.",
-          suggestion:
-            "You're doing great! Continue this trend and consider investing these savings.",
-          emoji: "🎉",
-        },
-        {
-          id: 4,
-          type: "positive",
-          severity: "low",
-          title: "Healthcare spending exactly on target",
-          description:
-            "Your healthcare spending matched your budget perfectly — showing great planning.",
-          suggestion:
-            "This level of predictability is excellent for long-term financial planning.",
-          emoji: "✨",
-        },
-      ],
-    },
-  };
-
-  const spendingCategories = spendingDataByRange[timeRange].categories;
-  // Use real contradiction detection instead of mock data
-  const contradictions =
-    detectedContradictions.length > 0
-      ? detectedContradictions
-      : spendingDataByRange[timeRange].contradictions; // Fallback to mock if none detected
+  // Contradictions: use real detections, no mock fallback needed
+  const contradictions = detectedContradictions;
 
   const totalSpent = spendingCategories.reduce(
     (sum, cat) => sum + cat.amount,
@@ -392,51 +93,7 @@ export default function BehaviorPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Header */}
-      <header className="bg-black/50 backdrop-blur-sm border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="text-2xl">💰</div>
-              <span className="text-2xl font-bold tracking-tight gradient-text">
-                FinCoach
-              </span>
-            </Link>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-neutral-400">Welcome back!</span>
-              <Link
-                href="/profile"
-                className="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white font-semibold hover:bg-emerald-600 transition-colors cursor-pointer"
-              >
-                {userName.charAt(0).toUpperCase() || "U"}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Mode Selector */}
-      <div className="bg-black/50 backdrop-blur-sm border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex gap-8">
-            <Link
-              href="/goals"
-              className="py-4 px-1 border-b-2 border-transparent text-neutral-400 hover:text-white hover:border-emerald-500 font-medium text-sm transition-colors"
-            >
-              🎯 Goals
-            </Link>
-            <button className="py-4 px-1 border-b-2 border-emerald-500 text-white font-medium text-sm">
-              📊 Behavior
-            </button>
-            <Link
-              href="/plan"
-              className="py-4 px-1 border-b-2 border-transparent text-neutral-400 hover:text-white hover:border-emerald-500 font-medium text-sm transition-colors"
-            >
-              📋 Plan
-            </Link>
-          </nav>
-        </div>
-      </div>
+      <DashboardNav userName={userName} />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -468,6 +125,20 @@ export default function BehaviorPage() {
         </div>
 
         {/* Spending Summary Card */}
+        {spendingLoading ? (
+          <div className="mb-8 glass rounded-2xl border border-white/5 p-6 animate-pulse">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div><div className="h-4 w-20 bg-white/10 rounded mb-2" /><div className="h-8 w-28 bg-white/5 rounded" /></div>
+              <div><div className="h-4 w-20 bg-white/10 rounded mb-2" /><div className="h-8 w-28 bg-white/5 rounded" /></div>
+              <div><div className="h-4 w-20 bg-white/10 rounded mb-2" /><div className="h-8 w-28 bg-white/5 rounded" /></div>
+            </div>
+          </div>
+        ) : spendingCategories.length === 0 ? (
+          <div className="mb-8 glass rounded-2xl border border-white/10 p-8 text-center">
+            <p className="text-4xl mb-3">📊</p>
+            <p className="text-neutral-400">No spending data yet. Connect a bank account via Plaid to see your real spending.</p>
+          </div>
+        ) : (
         <div className="mb-8 glass rounded-2xl border border-white/10 p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
@@ -493,6 +164,7 @@ export default function BehaviorPage() {
             </div>
           </div>
         </div>
+        )}
 
         {/* Spending Trends Chart */}
         <motion.div

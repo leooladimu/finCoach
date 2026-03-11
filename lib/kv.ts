@@ -7,46 +7,78 @@ import type {
   FinancialGoal,
   Task,
 } from '@/types';
+// Persist mock KV to disk so data survives dev server restarts
+// Uses dynamic require so the browser bundle never sees Node fs/path modules
+const DEV_KV_PATH = typeof process !== 'undefined' && process.cwd
+  ? `${process.cwd()}/.dev-kv.json`
+  : null;
 
-// Simple in-memory mock for local development
-const mockStore = new Map<string, any>();
+function loadDevStore(): Record<string, any> {
+  if (typeof window !== 'undefined' || !DEV_KV_PATH) return {};
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const fs = require('fs') as typeof import('fs');
+    if (fs.existsSync(DEV_KV_PATH)) {
+      return JSON.parse(fs.readFileSync(DEV_KV_PATH, 'utf-8'));
+    }
+  } catch { /* ignore */ }
+  return {};
+}
+
+function saveDevStore(): void {
+  if (typeof window !== 'undefined' || !DEV_KV_PATH) return;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const fs = require('fs') as typeof import('fs');
+    fs.writeFileSync(DEV_KV_PATH, JSON.stringify((globalThis as any).__devKVStore ?? {}, null, 2));
+  } catch { /* ignore */ }
+}
+
+// Global store persists across hot reloads within the same server process
+declare global {
+  // eslint-disable-next-line no-var
+  var __devKVStore: Record<string, any> | undefined;
+}
+if (!(globalThis as any).__devKVStore) {
+  (globalThis as any).__devKVStore = loadDevStore();
+}
 
 const createMockKV = () => ({
   async get(key: string): Promise<any> {
-    return mockStore.get(key) || null;
+    return (globalThis as any).__devKVStore![key] ?? null;
   },
   async set(key: string, value: any): Promise<void> {
-    mockStore.set(key, value);
+    (globalThis as any).__devKVStore![key] = value;
+    saveDevStore();
   },
   async hset(key: string, field: Record<string, any>): Promise<void> {
-    const hash = mockStore.get(key) || {};
-    Object.assign(hash, field);
-    mockStore.set(key, hash);
+    (globalThis as any).__devKVStore![key] = { ...((globalThis as any).__devKVStore![key] || {}), ...field };
+    saveDevStore();
   },
   async hget(key: string, field: string): Promise<any> {
-    const hash = mockStore.get(key) || {};
-    return hash[field] || null;
+    return ((globalThis as any).__devKVStore![key] || {})[field] ?? null;
   },
   async hgetall(key: string): Promise<any> {
-    return mockStore.get(key) || null;
+    return (globalThis as any).__devKVStore![key] ?? null;
   },
   async hdel(key: string, ...fields: string[]): Promise<void> {
-    const hash = mockStore.get(key) || {};
-    fields.forEach(field => delete hash[field]);
-    mockStore.set(key, hash);
+    const hash = (globalThis as any).__devKVStore![key] || {};
+    fields.forEach(f => delete hash[f]);
+    (globalThis as any).__devKVStore![key] = hash;
+    saveDevStore();
   },
   async lpush(key: string, ...values: any[]): Promise<void> {
-    const list = mockStore.get(key) || [];
+    const list = (globalThis as any).__devKVStore![key] || [];
     list.unshift(...values);
-    mockStore.set(key, list);
+    (globalThis as any).__devKVStore![key] = list;
+    saveDevStore();
   },
   async lrange(key: string, start: number, stop: number): Promise<any[]> {
-    const list = mockStore.get(key) || [];
-    return list.slice(start, stop + 1);
+    return ((globalThis as any).__devKVStore![key] || []).slice(start, stop + 1);
   },
   async ltrim(key: string, start: number, stop: number): Promise<void> {
-    const list = mockStore.get(key) || [];
-    mockStore.set(key, list.slice(start, stop + 1));
+    (globalThis as any).__devKVStore![key] = ((globalThis as any).__devKVStore![key] || []).slice(start, stop + 1);
+    saveDevStore();
   },
 });
 
@@ -72,6 +104,8 @@ const keys = {
   userContradictions: (userId: string) => `user:${userId}:contradictions`,
   userGoals: (userId: string) => `user:${userId}:goals`,
   userTasks: (userId: string) => `user:${userId}:tasks`,
+  // Plaid item → user lookup index
+  plaidItem: (itemId: string) => `plaid:item:${itemId}`,
 };
 
 // User Profile operations
@@ -92,6 +126,21 @@ export async function updateUserProfile(
   const updated = { ...current, ...updates } as UserProfile;
   await saveUserProfile(updated);
   return updated;
+}
+
+export async function deleteUserProfile(userId: string): Promise<void> {
+  await kv.set(keys.userProfile(userId), null);
+}
+
+// Plaid item → userId index
+// Written during token exchange so webhooks can resolve the owner of any item_id.
+export async function savePlaidItemIndex(itemId: string, userId: string): Promise<void> {
+  await kv.set(keys.plaidItem(itemId), userId);
+}
+
+export async function getUserIdByItemId(itemId: string): Promise<string | null> {
+  const userId = await kv.get(keys.plaidItem(itemId));
+  return (userId as string) ?? null;
 }
 
 // Financial data operations
@@ -331,10 +380,11 @@ export async function calculateSavingsRate(userId: string): Promise<number> {
 }
 
 /**
- * Initialize mock financial snapshot for development
- * Call this to populate KV with realistic demo data
+ * Seed a realistic mock financial snapshot for local development only.
+ * This is a NO-OP in production — it will never overwrite real Plaid data.
  */
 export async function initializeMockData(userId: string): Promise<void> {
+  if (process.env.NODE_ENV === 'production') return;
   const mockSnapshot: FinancialSnapshot = {
     timestamp: new Date().toISOString(),
     accounts: [

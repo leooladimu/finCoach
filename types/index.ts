@@ -191,3 +191,13 @@ export interface Task {
   createdAt: string;
   updatedAt: string;
 }
+
+// Spending category (aggregated from transactions)
+export interface SpendingCategory {
+  name: string;
+  amount: number;
+  budget: number;
+  percent: number;
+  color: string;
+  emoji: string;
+}

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { detectContradictions } from '@/lib/contradictions';
-import { initializeMockData, getUserProfile } from '@/lib/kv';
+import { detectContradictionsAction } from '@/lib/actions';
 import { useUser } from '@/lib/hooks/useUser';
 import type { Contradiction } from '@/types';
 
@@ -32,31 +31,8 @@ export function useContradictions(timeRange: 'week' | 'month' | 'year' = 'month'
         setLoading(true);
         setError(null);
 
-        // Load user profile from KV
-        const profile = await getUserProfile(userId);
-
-        if (!profile) {
-          // No profile data yet, show empty state
-          setContradictions([]);
-          setLoading(false);
-          return;
-        }
-
-        // Add stated preferences if not already set (for demo purposes)
-        if (!profile.statedPreferences) {
-          profile.statedPreferences = {
-            riskTolerance: 'moderate',
-            savingsGoal: 1000, // $1000/month savings goal
-            investmentStyle: 'passive',
-            priorityGoals: ['House Down Payment', 'Emergency Fund'],
-          };
-        }
-
-        // Initialize mock KV data for this user (for demo purposes)
-        await initializeMockData(userId);
-
-        // Run contradiction detection
-        const detected = await detectContradictions(userId, profile); setContradictions(detected);
+        const detected = await detectContradictionsAction(userId);
+        setContradictions(detected);
       } catch (err) {
         console.error('Error detecting contradictions:', err);
         setError('Failed to analyze spending patterns');

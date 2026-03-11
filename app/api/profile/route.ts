@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
-import { kv } from '@vercel/kv';
+import { deleteUserProfile } from '@/lib/kv';
 
 export async function DELETE() {
   try {
@@ -14,7 +14,7 @@ export async function DELETE() {
     }
 
     // Delete the user's profile from KV
-    await kv.del(`user:${userId}`);
+    await deleteUserProfile(userId);
 
     return NextResponse.json({ success: true, message: 'Profile deleted' });
   } catch (error) {

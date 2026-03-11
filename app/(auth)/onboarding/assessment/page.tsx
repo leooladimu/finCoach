@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { assessmentQuestions } from "@/lib/assessment";
 import type { AssessmentResult } from "@/types";
 import { useUser } from "@/lib/hooks/useUser";
-import { updateUserProfile } from "@/lib/kv";
+import { updateUserProfileAction } from "@/lib/actions";
 
 // Toast notification component
 function Toast({
@@ -430,7 +430,7 @@ export default function AssessmentPage() {
 
       // Save to KV only if we have a real userId
       if (userId) {
-        await updateUserProfile(userId, {
+        await updateUserProfileAction(userId, {
           moneyStyle: {
             type: assessmentResult.type,
             scores: assessmentResult.scores,

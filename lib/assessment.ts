@@ -723,3 +723,16 @@ export const coachingApproaches: Record<string, string> = {
 
   INFP: 'Together, we\'ll ensure every financial decision reflects your core values and supports your authentic path. I\'ll help you build wealth in ways that feel true to who you are, not who you "should" be. Expect reflective guidance, creative solutions, and permission to define success on your own terms.',
 };
+
+/**
+ * Hydrate a stored MBTI type string back into a full AssessmentResult.
+ * Use this wherever a profile is loaded from KV to avoid empty description fields.
+ */
+export function hydrateMoneyStyle(type: string, scores: import('@/types').MBTIScores): import('@/types').AssessmentResult {
+  return {
+    type: type as import('@/types').MBTIType,
+    scores,
+    moneyStyleDescription: moneyStyleDescriptions[type] ?? '',
+    coachingApproach: coachingApproaches[type] ?? '',
+  };
+}

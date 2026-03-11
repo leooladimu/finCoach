@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { DashboardNav } from "@/components/DashboardNav";
 import {
   BarChart,
   Bar,
@@ -15,14 +16,12 @@ import {
 import { motion } from "framer-motion";
 import type { AssessmentResult, FinancialGoal } from "@/types";
 import { useUser } from "@/lib/hooks/useUser";
-import { getGoals, saveGoal, updateGoal, getUserProfile } from "@/lib/kv";
+import { getGoalsAction, saveGoalAction, updateGoalAction, getUserProfileAction } from "@/lib/actions";
 import { PlaidLinkButton } from "@/components/PlaidLinkButton";
+import { hydrateMoneyStyle } from "@/lib/assessment";
 
 export default function GoalsPage() {
   const { userId, isLoaded } = useUser();
-  const [activeTab, setActiveTab] = useState<"goals" | "behavior" | "plan">(
-    "goals",
-  );
   const [showNewGoalModal, setShowNewGoalModal] = useState(false);
   const [showUpdateProgressModal, setShowUpdateProgressModal] = useState(false);
   const [showSyncModal, setShowSyncModal] = useState(false);
@@ -47,14 +46,9 @@ export default function GoalsPage() {
       if (!isLoaded || !userId) return;
 
       // Load money style from profile
-      const profile = await getUserProfile(userId);
+      const profile = await getUserProfileAction(userId);
       if (profile?.moneyStyle) {
-        setMoneyStyle({
-          type: profile.moneyStyle.type,
-          scores: profile.moneyStyle.scores,
-          moneyStyleDescription: "",
-          coachingApproach: "",
-        });
+        setMoneyStyle(hydrateMoneyStyle(profile.moneyStyle.type, profile.moneyStyle.scores));
       }
 
       // Set user name for avatar
@@ -63,7 +57,7 @@ export default function GoalsPage() {
       }
 
       // Load goals from KV
-      const savedGoals = await getGoals(userId);
+      const savedGoals = await getGoalsAction(userId);
       if (savedGoals.length > 0) {
         setGoals(
           savedGoals.map((g) => ({
@@ -107,7 +101,7 @@ export default function GoalsPage() {
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
             };
-            await saveGoal(kvGoal);
+            await saveGoalAction(kvGoal);
           }
         }
       }
@@ -157,7 +151,7 @@ export default function GoalsPage() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      await saveGoal(kvGoal);
+      await saveGoalAction(kvGoal);
     }
 
     // Reset form and close modal
@@ -192,7 +186,7 @@ export default function GoalsPage() {
         (g) => g.id === updateProgress.goalId,
       );
       if (goalToUpdate) {
-        await updateGoal(userId, goalToUpdate.id, {
+        await updateGoalAction(userId, goalToUpdate.id, {
           currentAmount: goalToUpdate.currentAmount,
         });
       }
@@ -205,55 +199,7 @@ export default function GoalsPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Header */}
-      <header className="glass border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <Link href="/" className="text-2xl font-bold gradient-text">
-              FinCoach
-            </Link>
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-neutral-400">Welcome back!</span>
-              <Link
-                href="/profile"
-                className="w-10 h-10 bg-emerald-500 hover:bg-emerald-600 rounded-full flex items-center justify-center text-white font-semibold transition-colors cursor-pointer"
-              >
-                {userName.charAt(0).toUpperCase() || "U"}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Mode Selector */}
-      <div className="border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex gap-8">
-            <button
-              onClick={() => setActiveTab("goals")}
-              className={`py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === "goals"
-                  ? "border-emerald-500 text-white"
-                  : "border-transparent text-neutral-500 hover:text-neutral-300"
-              }`}
-            >
-              🎯 Goals
-            </button>
-            <Link
-              href="/behavior"
-              className="py-4 px-1 border-b-2 border-transparent text-neutral-500 hover:text-neutral-300 font-medium text-sm transition-colors"
-            >
-              📊 Behavior
-            </Link>
-            <Link
-              href="/plan"
-              className="py-4 px-1 border-b-2 border-transparent text-neutral-500 hover:text-neutral-300 font-medium text-sm transition-colors"
-            >
-              📋 Plan
-            </Link>
-          </nav>
-        </div>
-      </div>
+      <DashboardNav userName={userName} />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

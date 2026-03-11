@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@/lib/hooks/useUser";
-import { getUserProfile } from "@/lib/kv";
+import { getUserProfileAction } from "@/lib/actions";
 
 export default function DashboardLayout({
   children,
@@ -28,7 +28,7 @@ export default function DashboardLayout({
       // Check if user has completed the assessment
       if (userId) {
         try {
-          const profile = await getUserProfile(userId);
+          const profile = await getUserProfileAction(userId);
 
           // If no profile or no money style, redirect to onboarding
           if (!profile || !profile.moneyStyle) {

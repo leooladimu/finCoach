@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import type { AssessmentResult } from "@/types";
 import { useUser } from "@/lib/hooks/useUser";
-import { getUserProfile, updateUserProfile } from "@/lib/kv";
+import { getUserProfileAction, updateUserProfileAction } from "@/lib/actions";
+import { hydrateMoneyStyle } from "@/lib/assessment";
 
 export default function ProfilePage() {
   const { userId, isLoaded } = useUser();
@@ -25,7 +26,7 @@ export default function ProfilePage() {
     async function loadData() {
       if (!isLoaded || !userId) return;
 
-      const kvProfile = await getUserProfile(userId);
+      const kvProfile = await getUserProfileAction(userId);
       if (kvProfile) {
         const profileData = {
           name: kvProfile.name,
@@ -38,12 +39,7 @@ export default function ProfilePage() {
         setEditedProfile(profileData);
 
         if (kvProfile.moneyStyle) {
-          setMoneyStyle({
-            type: kvProfile.moneyStyle.type,
-            scores: kvProfile.moneyStyle.scores,
-            moneyStyleDescription: "",
-            coachingApproach: "",
-          });
+          setMoneyStyle(hydrateMoneyStyle(kvProfile.moneyStyle.type, kvProfile.moneyStyle.scores));
         }
       }
     }
@@ -56,7 +52,7 @@ export default function ProfilePage() {
 
     // Save to KV
     if (userId) {
-      await updateUserProfile(userId, {
+      await updateUserProfileAction(userId, {
         name: editedProfile.name,
         email: editedProfile.email,
         lifeContext: {

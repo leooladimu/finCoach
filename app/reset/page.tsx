@@ -2,15 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/lib/hooks/useUser";
 
 export default function ResetPage() {
   const router = useRouter();
-  const [status, setStatus] = useState<string>("Cleaning up...");
+  const { userId, isLoaded } = useUser();
+  const [status, setStatus] = useState<string>("Checking authentication...");
 
   useEffect(() => {
+    // Guard: only authenticated users can reset their own data
+    if (isLoaded && !userId) {
+      router.replace("/sign-in");
+      return;
+    }
+
+    if (!isLoaded || !userId) return;
+
     async function cleanup() {
       try {
-        // Step 1: Delete profile from database
         setStatus("Deleting profile from database...");
         try {
           await fetch("/api/profile", { method: "DELETE" });
@@ -20,16 +29,12 @@ export default function ResetPage() {
           setStatus("Profile delete failed (continuing...)");
         }
 
-        // Step 2: Clear ALL localStorage
         setStatus("Clearing browser storage...");
         localStorage.clear();
         sessionStorage.clear();
-
         setStatus("Storage cleared ✓");
 
         setStatus("Redirecting to sign out...");
-
-        // Wait a moment then redirect to sign out
         setTimeout(() => {
           window.location.href = "/sign-out";
         }, 1000);
@@ -43,7 +48,7 @@ export default function ResetPage() {
     }
 
     cleanup();
-  }, [router]);
+  }, [router, userId, isLoaded]);
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4">

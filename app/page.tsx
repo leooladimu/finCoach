@@ -6,19 +6,17 @@ import { getUserProfile } from "@/lib/kv";
 export default async function Home() {
   const { userId } = await auth();
 
-  // Only redirect if user is signed in AND has completed assessment
+  // Redirect authenticated users based on their profile state
   if (userId) {
     try {
       const profile = await getUserProfile(userId);
-
-      // If they have a money style, they've completed assessment - go to goals
       if (profile?.moneyStyle) {
-        redirect("/goals");
+        redirect("/goals");       // Completed onboarding → dashboard
+      } else {
+        redirect("/onboarding");  // Signed in but no assessment → onboarding
       }
-      // If signed in but no assessment, let them see landing page
-      // They can choose to continue onboarding or explore
     } catch {
-      // If error getting profile, just show landing page
+      redirect("/onboarding");    // Error reading profile → send to onboarding to be safe
     }
   }
 
