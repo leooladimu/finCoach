@@ -4,11 +4,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import type { AssessmentResult } from "@/types";
 import { useUser } from "@/lib/hooks/useUser";
+import { useClerk } from "@clerk/nextjs";
 import { getUserProfileAction, updateUserProfileAction } from "@/lib/actions";
 import { hydrateMoneyStyle } from "@/lib/assessment";
 
 export default function ProfilePage() {
   const { userId, isLoaded } = useUser();
+  const { signOut } = useClerk();
   const [profile, setProfile] = useState({
     name: "",
     email: "",
@@ -421,6 +423,16 @@ export default function ProfilePage() {
               </div>
             </Link>
           </div>
+        </div>
+
+        {/* Sign Out */}
+        <div className="flex justify-center pt-4 pb-8">
+          <button
+            onClick={() => signOut({ redirectUrl: "/" })}
+            className="px-6 py-3 text-neutral-400 hover:text-red-400 border border-white/10 hover:border-red-500/30 rounded-xl transition-all text-sm font-medium"
+          >
+            Sign Out
+          </button>
         </div>
       </main>
     </div>
